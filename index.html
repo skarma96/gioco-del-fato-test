@@ -1410,6 +1410,13 @@
                                 <div class="dice-input"><input type="number" id="tcalc-dice-1" min="1" max="6" placeholder="D2"></div>
                                 <div class="dice-input"><input type="number" id="tcalc-dice-2" min="1" max="6" placeholder="D3"></div>
                             </div>
+                            <div style="margin: 10px 0;">
+                                <label style="font-size: 0.9em; color: #888;">Direzione:</label>
+                                <select id="target-calc-direction" style="margin-left: 8px; padding: 4px 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 4px;">
+                                    <option value="clockwise">🔄 Orario</option>
+                                    <option value="counterclockwise">🔃 Antiorario</option>
+                                </select>
+                            </div>
                             <button onclick="calculateTargetOnly()">🎯 Calcola Bersaglio</button>
                             <div id="target-calc-result" style="background: rgba(255,0,255,0.1); padding: 12px; border-radius: 8px; display: none; margin-top: 10px; color: #ff00ff; font-weight: 600;"></div>
                         </div>
@@ -2138,12 +2145,16 @@
                 container.appendChild(div);
             }
 
-            // Auto-suggest HP
+            // Auto-suggest HP based on number of players
             const hpInput = document.getElementById('initial-hp');
-            if (numPlayers >= 7) {
-                hpInput.value = 80;
-            } else {
+            if (numPlayers === 4) {
+                hpInput.value = 60;
+            } else if (numPlayers >= 5 && numPlayers <= 6) {
                 hpInput.value = 70;
+            } else if (numPlayers >= 7 && numPlayers <= 8) {
+                hpInput.value = 80;
+            } else if (numPlayers >= 9) {
+                hpInput.value = 85;
             }
         }
 
@@ -3139,6 +3150,11 @@
             // PARI PAZZO - somme pari subiscono danno pari alla giocata
             if (gfx.pariPazzo && result.sum % 2 === 0 && result.damage > 0) {
                 shooter.hp = Math.max(0, shooter.hp - result.damage);
+                // Traccia statistiche auto-danni
+                if (!gameState.stats[shooter.name]) {
+                    gameState.stats[shooter.name] = { damageDealt: 0, damageTaken: 0, healingDone: 0, specialMoves: 0, turns: 0 };
+                }
+                gameState.stats[shooter.name].damageTaken += result.damage;
                 gameState.history.push(`🎲 [Pari Pazzo] ${shooter.name} ha ottenuto somma pari (${result.sum}) → subisce ${result.damage} danni auto-inflitti`);
                 if (shooter.hp === 0 && !shooter.isEliminated) {
                     shooter.isEliminated = true;
@@ -3163,6 +3179,11 @@
             // CANNONE KARMA - danni a bersaglio E a sé stesso
             if (gfx.cannoneKarma && result.shooterIndex !== gfx.cannoneKarmaActivator && result.damage > 0) {
                 shooter.hp = Math.max(0, shooter.hp - result.damage);
+                // Traccia statistiche auto-danni
+                if (!gameState.stats[shooter.name]) {
+                    gameState.stats[shooter.name] = { damageDealt: 0, damageTaken: 0, healingDone: 0, specialMoves: 0, turns: 0 };
+                }
+                gameState.stats[shooter.name].damageTaken += result.damage;
                 gameState.history.push(`💥 [Cannone Karma] ${shooter.name} subisce ${result.damage} danni auto-inflitti (stesso danno del bersaglio)`);
                 if (shooter.hp === 0 && !shooter.isEliminated) {
                     shooter.isEliminated = true;
@@ -3203,45 +3224,78 @@
                 }
             });
 
+            // IMPORTANTE: Riassegna target dopo effetti globali (Bambola Voodoo può cambiare targetIndex)
+            const finalTarget = result.targetIndex >= 0 ? gameState.players[result.targetIndex] : null;
+
             // Apply damage
-            if (target) {
+            if (finalTarget) {
+                // Initialize stats for target if not exists
+                if (!gameState.stats[finalTarget.name]) {
+                    gameState.stats[finalTarget.name] = {
+                        damageDealt: 0,
+                        damageTaken: 0,
+                        healingDone: 0,
+                        specialMoves: 0,
+                        turns: 0
+                    };
+                }
+                
+                // Apply multiplier to damage (calcolo anticipato per Volo Fenice)
+                const multiplier = finalTarget.multiplier || 1;
+                let actualDamage = Math.ceil(result.damage * multiplier);
+                
+                // BOOMERANG - accumula invece di applicare (PRIORITÀ MASSIMA - sempre prima di tutto)
+                if (gfx.boomerang && result.targetIndex === gfx.boomerangActivator && actualDamage > 0) {
+                    gfx.boomerangDamage += actualDamage;
+                    gameState.history.push(`🪃 [Boomerang] ${finalTarget.name} accumula ${actualDamage} danni (totale accumulato: ${gfx.boomerangDamage})`);
+                    // Non applicare danno ora, verrà applicato alla fine del turno dell'attivatore
+                    database.ref('games/' + gameState.gameCode).update({
+                        globalEffects: gameState.globalEffects,
+                        history: gameState.history
+                    });
+                    return; // Esce dalla funzione - Boomerang accumula SEMPRE, anche se immortale
+                }
+                
+                // VOLO DELLA FENICE - cure raddoppiate al posto dei danni (PRIORITÀ ALTA)
+                if (finalTarget.voloFenice && actualDamage > 0) {
+                    const heal = actualDamage * 2;
+                    finalTarget.hp += heal;
+                    gameState.history.push(`🦅 [Volo Fenice] ${finalTarget.name} converte ${actualDamage} danni in +${heal} HP di cura`);
+                    animateHP(result.targetIndex, heal);
+                    playSound('heal');
+                    if (finalTarget.name === gameState.playerName) {
+                        screenFlash('heal');
+                        createParticles(window.innerWidth / 2, window.innerWidth / 2, 'heal');
+                    }
+                    database.ref('games/' + gameState.gameCode).update({
+                        players: gameState.players,
+                        history: gameState.history
+                    });
+                    // Non fare altro, il danno è stato convertito
+                } 
                 // Check if target is immortal
-                if (target.isImmortal) {
+                else if (finalTarget.isImmortal) {
                     // Immortal player takes no damage
-                    gameState.history.push(`⭐ ${target.name} è immortale e non subisce danni!`);
+                    gameState.history.push(`⭐ ${finalTarget.name} è immortale e non subisce danni!`);
                     playSound('heal'); // Suono positivo per indicare l'immortalità
                     
                     // Visual effect for immortal player
-                    if (target.name === gameState.playerName) {
+                    if (finalTarget.name === gameState.playerName) {
                         screenFlash('heal');
                         createParticles(window.innerWidth / 2, window.innerHeight / 2, 'heal');
                     }
                 } else {
-                    // Initialize stats for target if not exists
-                    if (!gameState.stats[target.name]) {
-                        gameState.stats[target.name] = {
-                            damageDealt: 0,
-                            damageTaken: 0,
-                            healingDone: 0,
-                            specialMoves: 0,
-                            turns: 0
-                        };
-                    }
-                    
-                    // Apply multiplier to damage
-                    const multiplier = target.multiplier || 1;
-                    let actualDamage = Math.ceil(result.damage * multiplier); // Arrotonda per eccesso
-                    
-                    const wasAlive = !target.isEliminated;
+
+                    const wasAlive = !finalTarget.isEliminated;
                     
                     // === MECCANICHE INDIVIDUALI DEL TARGET ===
                     
                     // INTERFERENZA - trasferisci danno al partner
-                    if (target.interferenza && target.interferenzaPartner !== null && actualDamage > 0) {
-                        const partner = gameState.players[target.interferenzaPartner];
+                    if (finalTarget.interferenza && finalTarget.interferenzaPartner !== null && actualDamage > 0) {
+                        const partner = gameState.players[finalTarget.interferenzaPartner];
                         if (partner && !partner.isEliminated) {
-                            const originalTargetName = target.name;
-                            result.targetIndex = target.interferenzaPartner;
+                            const originalTargetName = finalTarget.name;
+                            result.targetIndex = finalTarget.interferenzaPartner;
                             // Aggiorna il target
                             const newTarget = partner;
                             gameState.history.push(`🔀 [Interferenza] Danno trasferito da ${originalTargetName} a ${partner.name}`);
@@ -3251,7 +3305,7 @@
                                 newTarget.isEliminated = true;
                                 gameState.history.push(`💀 ${newTarget.name} è stato eliminato!`);
                             }
-                            animateHP(target.interferenzaPartner, -actualDamage);
+                            animateHP(finalTarget.interferenzaPartner, -actualDamage);
                             playSound('damage');
                             if (newTarget.name === gameState.playerName) {
                                 screenFlash('damage');
@@ -3266,17 +3320,6 @@
                         }
                     }
                     
-                    // BOOMERANG - accumula invece di applicare
-                    if (gfx.boomerang && result.targetIndex === gfx.boomerangActivator && actualDamage > 0) {
-                        gfx.boomerangDamage += actualDamage;
-                        gameState.history.push(`🪃 [Boomerang] ${target.name} accumula ${actualDamage} danni (totale accumulato: ${gfx.boomerangDamage})`);
-                        // Non applicare danno ora, verrà applicato alla fine del turno dell'attivatore
-                        database.ref('games/' + gameState.gameCode).update({
-                            globalEffects: gameState.globalEffects,
-                            history: gameState.history
-                        });
-                        return; // Esce dalla funzione
-                    }
                     
                     // ARMATURA SPECCHIO - distribuisci danno a tutti
                     if (gfx.armaturaSpecchio && result.targetIndex === gfx.armaturaSpecchioActivator && actualDamage > 0) {
@@ -3300,28 +3343,10 @@
                         return; // Esce dalla funzione
                     }
                     
-                    // VOLO DELLA FENICE - cure raddoppiate al posto dei danni
-                    if (target.voloFenice && actualDamage > 0) {
-                        const heal = actualDamage * 2;
-                        target.hp += heal;
-                        gameState.history.push(`🦅 [Volo Fenice] ${target.name} converte ${actualDamage} danni in +${heal} HP di cura`);
-                        animateHP(result.targetIndex, heal);
-                        playSound('heal');
-                        if (target.name === gameState.playerName) {
-                            screenFlash('heal');
-                            createParticles(window.innerWidth / 2, window.innerHeight / 2, 'heal');
-                        }
-                        database.ref('games/' + gameState.gameCode).update({
-                            players: gameState.players,
-                            history: gameState.history
-                        });
-                        return; // Non applicare danno
-                    }
-                    
                     // RIFLETTI DANNI - rifletti sull'attaccante
-                    if (target.rifletteDanni && actualDamage > 0) {
+                    if (finalTarget.rifletteDanni && actualDamage > 0) {
                         shooter.hp = Math.max(0, shooter.hp - actualDamage);
-                        gameState.history.push(`🛡️ [Rifletti Danni] ${shooter.name} subisce ${actualDamage} danni riflessi da ${target.name}`);
+                        gameState.history.push(`🛡️ [Rifletti Danni] ${shooter.name} subisce ${actualDamage} danni riflessi da ${finalTarget.name}`);
                         if (shooter.hp === 0 && !shooter.isEliminated) {
                             shooter.isEliminated = true;
                             gameState.history.push(`💀 ${shooter.name} è stato eliminato dal riflesso!`);
@@ -3335,24 +3360,41 @@
                         return; // Target non subisce danno
                     }
                     
-                    // MARE DI GUAI - duplica danno all'attaccante e salta turno
-                    if (target.mareGuai && actualDamage > 0) {
-                        const reflectedDamage = actualDamage * 2;
-                        shooter.hp = Math.max(0, shooter.hp - reflectedDamage);
-                        shooter.skipTurn = true;
-                        gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} subisce ${reflectedDamage} danni riflessi (x2) e salterà il prossimo turno`);
-                        if (shooter.hp === 0 && !shooter.isEliminated) {
-                            shooter.isEliminated = true;
-                            gameState.history.push(`💀 ${shooter.name} è stato eliminato!`);
+                    // MARE DI GUAI - applica moltiplicatore x2 all'attaccante e salta turno
+                    if (finalTarget.mareGuai && actualDamage > 0) {
+                        // Applica moltiplicatore x2 solo se l'attaccante non ne ha già uno
+                        if (shooter.multiplier === 1) {
+                            shooter.multiplier = 2;
+                            shooter.multiplierAppliedBy = result.shooterIndex; // Si auto-applica
+                            shooter.temporaryEffects.multiplier = true; // Dura 1 turno dell'attaccante
+                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} ottiene moltiplicatore danni x2 per il prossimo turno`);
+                        } else {
+                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} ha già un moltiplicatore attivo (x${shooter.multiplier}) - Mare di Guai non ha effetto`);
                         }
-                        animateHP(result.shooterIndex, -reflectedDamage);
+                        // Far saltare il turno (solo se non sta già saltando)
+                        if (!shooter.skipTurn) {
+                            shooter.skipTurn = true;
+                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} salterà il prossimo turno`);
+                        } else {
+                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} sta già saltando il prossimo turno`);
+                        }
+                        // Il target subisce comunque i danni normalmente (continua con il flusso)
                     }
                     
                     // CACTUS AMARI - subisce e riflette il doppio
-                    if (target.cactusAmari && actualDamage > 0) {
+                    if (finalTarget.cactusAmari && actualDamage > 0) {
                         const reflectedDamage = actualDamage * 2;
                         shooter.hp = Math.max(0, shooter.hp - reflectedDamage);
-                        gameState.history.push(`🌵 [Cactus Amari] ${shooter.name} subisce ${reflectedDamage} danni riflessi (x2) da ${target.name}`);
+                        // Traccia statistiche riflessi
+                        if (!gameState.stats[shooter.name]) {
+                            gameState.stats[shooter.name] = { damageDealt: 0, damageTaken: 0, healingDone: 0, specialMoves: 0, turns: 0 };
+                        }
+                        if (!gameState.stats[finalTarget.name]) {
+                            gameState.stats[finalTarget.name] = { damageDealt: 0, damageTaken: 0, healingDone: 0, specialMoves: 0, turns: 0 };
+                        }
+                        gameState.stats[shooter.name].damageTaken += reflectedDamage;
+                        gameState.stats[finalTarget.name].damageDealt += reflectedDamage;
+                        gameState.history.push(`🌵 [Cactus Amari] ${shooter.name} subisce ${reflectedDamage} danni riflessi (x2) da ${finalTarget.name}`);
                         if (shooter.hp === 0 && !shooter.isEliminated) {
                             shooter.isEliminated = true;
                             gameState.history.push(`💀 ${shooter.name} è stato eliminato dalle spine!`);
@@ -3362,7 +3404,7 @@
                     }
                     
                     // CATENA MALEDETTA - infligge danno ai giocatori adiacenti
-                    if (target.catenaMaledetta && actualDamage > 0) {
+                    if (finalTarget.catenaMaledetta && actualDamage > 0) {
                         const targetIdx = result.targetIndex;
                         const prevIdx = (targetIdx - 1 + gameState.players.length) % gameState.players.length;
                         const nextIdx = (targetIdx + 1) % gameState.players.length;
@@ -3387,8 +3429,12 @@
                     // SABBIE MOBILI - chi viene colpito salta il turno
                     if (gfx.sabbieMobili && result.shooterIndex !== gfx.sabbieMobiliActivator && actualDamage > 0) {
                         if (result.targetIndex !== gfx.sabbieMobiliActivator) {
-                            target.skipTurn = true;
-                            gameState.history.push(`⏳ [Sabbie Mobili] ${target.name} salterà il prossimo turno`);
+                            if (!finalTarget.skipTurn) {
+                                finalTarget.skipTurn = true;
+                                gameState.history.push(`⏳ [Sabbie Mobili] ${finalTarget.name} salterà il prossimo turno`);
+                            } else {
+                                gameState.history.push(`⏳ [Sabbie Mobili] ${finalTarget.name} sta già saltando il prossimo turno`);
+                            }
                         }
                     }
                     
@@ -3397,89 +3443,89 @@
                     let conversionReason = '';
                     
                     // 1. Conversione Danni→Cure (💫) - Converte TUTTI i danni
-                    if (target.damageToHeal) {
+                    if (finalTarget.damageToHeal) {
                         shouldConvertToHeal = true;
                         conversionReason = '💫 Conversione Danni→Cure';
                     }
                     // 2. Armatura del Sole (☀️) - Converte solo danni DISPARI
-                    else if (target.sunArmor && actualDamage % 2 !== 0) {
+                    else if (finalTarget.sunArmor && actualDamage % 2 !== 0) {
                         shouldConvertToHeal = true;
                         conversionReason = `☀️ Armatura del Sole (${actualDamage} dispari)`;
                     }
                     // 3. Armatura della Luna (🌙) - Converte solo danni PARI
-                    else if (target.moonArmor && actualDamage % 2 === 0) {
+                    else if (finalTarget.moonArmor && actualDamage % 2 === 0) {
                         shouldConvertToHeal = true;
                         conversionReason = `🌙 Armatura della Luna (${actualDamage} pari)`;
                     }
                     
                     if (shouldConvertToHeal) {
                         // Converti danno in cura (NON aggiornare damageDealt/Taken!)
-                        target.hp += actualDamage;
-                        gameState.history.push(`${conversionReason}: ${target.name} si cura di ${actualDamage} HP invece di subirli!`);
+                        finalTarget.hp += actualDamage;
+                        gameState.history.push(`${conversionReason}: ${finalTarget.name} si cura di ${actualDamage} HP invece di subirli!`);
                         animateHP(result.targetIndex, actualDamage);
                         playSound('heal');
                         
                         // Visual effects for heal
-                        if (target.name === gameState.playerName) {
+                        if (finalTarget.name === gameState.playerName) {
                             screenFlash('heal');
                             createParticles(window.innerWidth / 2, window.innerHeight / 2, 'heal');
                         }
                     } else {
                         // Applica danno normalmente - SOLO QUI aggiorniamo le stats
                         gameState.stats[shooter.name].damageDealt += actualDamage;
-                        gameState.stats[target.name].damageTaken += actualDamage;
+                        gameState.stats[finalTarget.name].damageTaken += actualDamage;
                         
-                        target.hp = Math.max(0, target.hp - actualDamage);
+                        finalTarget.hp = Math.max(0, finalTarget.hp - actualDamage);
                         
                         // Check Checkmate - auto-eliminate at exact HP value
-                        if (target.checkmateHP && target.hp === target.checkmateHP && !target.isEliminated) {
-                            target.hp = 0;
-                            target.isEliminated = true;
-                            gameState.history.push(`♟️ ${target.name} è stato eliminato dallo Scacco Matto! (${target.checkmateHP} HP)`);
+                        if (finalTarget.checkmateHP && finalTarget.hp === finalTarget.checkmateHP && !finalTarget.isEliminated) {
+                            finalTarget.hp = 0;
+                            finalTarget.isEliminated = true;
+                            gameState.history.push(`♟️ ${finalTarget.name} è stato eliminato dallo Scacco Matto! (${finalTarget.checkmateHP} HP)`);
                             
                             // Show elimination notification
-                            if (target.name === gameState.playerName && !gameState.isMaster) {
+                            if (finalTarget.name === gameState.playerName && !gameState.isMaster) {
                                 setTimeout(() => showEliminatedNotification(), 500);
                             }
                             
                             playSound('elimination');
                         }
                         // Check Kraken Mark - auto-eliminate at 10 HP or less
-                        else if (target.krakenMark && target.hp <= 10 && target.hp > 0 && !target.isEliminated) {
-                            target.hp = 0;
-                            target.isEliminated = true;
-                            gameState.history.push(`🐙 ${target.name} è stato eliminato dal Marchio del Kraken! (HP ≤ 10)`);
+                        else if (finalTarget.krakenMark && finalTarget.hp <= 10 && finalTarget.hp > 0 && !finalTarget.isEliminated) {
+                            finalTarget.hp = 0;
+                            finalTarget.isEliminated = true;
+                            gameState.history.push(`🐙 ${finalTarget.name} è stato eliminato dal Marchio del Kraken! (HP ≤ 10)`);
                             
                             // Show elimination notification
-                            if (target.name === gameState.playerName && !gameState.isMaster) {
+                            if (finalTarget.name === gameState.playerName && !gameState.isMaster) {
                                 setTimeout(() => showEliminatedNotification(), 500);
                             }
                             
                             playSound('elimination');
-                        } else if (target.hp === 0 && wasAlive) {
+                        } else if (finalTarget.hp === 0 && wasAlive) {
                             // === RESET TUTTI GLI EFFETTI QUANDO ELIMINATO ===
-                            target.isImmortal = false;
-                            target.multiplier = 1;
-                            target.multiplierAppliedBy = null;
-                            target.skipTurn = false;
-                            target.customDiceCount = null;
-                            target.krakenMark = false;
-                            target.checkmateHP = null;
-                            target.damageToHeal = false;
-                            target.sunArmor = false;
-                            target.moonArmor = false;
-                            target.mareGuai = false;
-                            target.voloFenice = false;
-                            target.cactusAmari = false;
-                            target.catenaMaledetta = false;
-                            target.rifletteDanni = false;
+                            finalTarget.isImmortal = false;
+                            finalTarget.multiplier = 1;
+                            finalTarget.multiplierAppliedBy = null;
+                            finalTarget.skipTurn = false;
+                            finalTarget.customDiceCount = null;
+                            finalTarget.krakenMark = false;
+                            finalTarget.checkmateHP = null;
+                            finalTarget.damageToHeal = false;
+                            finalTarget.sunArmor = false;
+                            finalTarget.moonArmor = false;
+                            finalTarget.mareGuai = false;
+                            finalTarget.voloFenice = false;
+                            finalTarget.cactusAmari = false;
+                            finalTarget.catenaMaledetta = false;
+                            finalTarget.rifletteDanni = false;
                             target.talismanRa = false;
                             target.talismanRaValues = [];
                             target.dadoAvvelenato = false;
                             target.dadoAvvelenatotValues = [];
-                            target.interferenza = false;
-                            target.interferenzaPartner = null;
-                            target.temporaryEffects = {
+                            finalTarget.interferenza = false;
+                            finalTarget.interferenzaPartner = null;
+                            finalTarget.temporaryEffects = {
                                 immortal: false, multiplier: false, skipTurn: false, customDice: false,
                                 damageToHeal: false, sunArmor: false, moonArmor: false,
                                 mareGuai: false, voloFenice: false, cactusAmari: false,
@@ -3491,54 +3537,54 @@
                             let resurrected = false;
                             
                             // 1. CANTO DEL CIGNO
-                            if (target.cantoDelCigno) {
-                                target.hp = 1;
-                                target.isEliminated = false;
-                                target.cantoDelCigno = false;
-                                gameState.history.push(`🦢 [Canto del Cigno] ${target.name} torna in vita con 1 HP!`);
+                            if (finalTarget.cantoDelCigno) {
+                                finalTarget.hp = 1;
+                                finalTarget.isEliminated = false;
+                                finalTarget.cantoDelCigno = false;
+                                gameState.history.push(`🦢 [Canto del Cigno] ${finalTarget.name} torna in vita con 1 HP!`);
                                 playSound('revive');
-                                if (target.name === gameState.playerName) {
+                                if (finalTarget.name === gameState.playerName) {
                                     screenFlash('revive');
                                 }
                                 resurrected = true;
                             }
                             // 2. PATTO CON IL DIAVOLO
-                            else if (target.pattoDiavolo && !target.pattoDiavoloUsed) {
-                                target.hp = 20;
-                                target.isEliminated = false;
-                                target.customDiceCount = 2; // Solo 2 dadi per sempre
-                                target.pattoDiavolo = false;
-                                target.pattoDiavoloUsed = true;
-                                gameState.history.push(`😈 [Patto col Diavolo] ${target.name} torna con 20 HP, ma userà solo 2 dadi per sempre`);
+                            else if (finalTarget.pattoDiavolo && !finalTarget.pattoDiavoloUsed) {
+                                finalTarget.hp = 20;
+                                finalTarget.isEliminated = false;
+                                finalTarget.customDiceCount = 2; // Solo 2 dadi per sempre
+                                finalTarget.pattoDiavolo = false;
+                                finalTarget.pattoDiavoloUsed = true;
+                                gameState.history.push(`😈 [Patto col Diavolo] ${finalTarget.name} torna con 20 HP, ma userà solo 2 dadi per sempre`);
                                 playSound('revive');
-                                if (target.name === gameState.playerName) {
+                                if (finalTarget.name === gameState.playerName) {
                                     screenFlash('revive');
                                 }
                                 resurrected = true;
                             }
                             // 3. TOMBA DI TUTANKHAMON
-                            else if (target.tombaTutankhamon) {
-                                target.hp = Math.ceil(gameState.initialHP / 2);
-                                target.isEliminated = false;
-                                target.skipTurn = true;
-                                target.tombaTutankhamon = false;
-                                gameState.history.push(`🏺 [Tomba Tutankhamon] ${target.name} torna con ${target.hp} HP, ma salterà il prossimo turno`);
+                            else if (finalTarget.tombaTutankhamon) {
+                                finalTarget.hp = Math.ceil(gameState.initialHP / 2);
+                                finalTarget.isEliminated = false;
+                                finalTarget.skipTurn = true;
+                                finalTarget.tombaTutankhamon = false;
+                                gameState.history.push(`🏺 [Tomba Tutankhamon] ${finalTarget.name} torna con ${finalTarget.hp} HP, ma salterà il prossimo turno`);
                                 playSound('revive');
-                                if (target.name === gameState.playerName) {
+                                if (finalTarget.name === gameState.playerName) {
                                     screenFlash('revive');
                                 }
                                 resurrected = true;
                             }
                             // 4. REINCARNAZIONE
-                            else if (target.reincarnazione && !target.reincarnazioneUsed) {
-                                target.hp = gameState.initialHP;
-                                target.isEliminated = false;
-                                target.multiplier = 2; // Danni x2 permanenti
-                                target.reincarnazione = false;
-                                target.reincarnazioneUsed = true;
-                                gameState.history.push(`♻️ [Reincarnazione] ${target.name} torna con ${target.hp} HP, ma subirà danni x2 permanentemente`);
+                            else if (finalTarget.reincarnazione && !finalTarget.reincarnazioneUsed) {
+                                finalTarget.hp = gameState.initialHP;
+                                finalTarget.isEliminated = false;
+                                finalTarget.multiplier = 2; // Danni x2 permanenti
+                                finalTarget.reincarnazione = false;
+                                finalTarget.reincarnazioneUsed = true;
+                                gameState.history.push(`♻️ [Reincarnazione] ${finalTarget.name} torna con ${finalTarget.hp} HP, ma subirà danni x2 permanentemente`);
                                 playSound('revive');
-                                if (target.name === gameState.playerName) {
+                                if (finalTarget.name === gameState.playerName) {
                                     screenFlash('revive');
                                 }
                                 resurrected = true;
@@ -3546,11 +3592,11 @@
                             
                             // Nessuna resurrezione - eliminato definitivamente
                             if (!resurrected) {
-                                target.isEliminated = true;
-                                gameState.history.push(`💀 ${target.name} è stato eliminato!`);
+                                finalTarget.isEliminated = true;
+                                gameState.history.push(`💀 ${finalTarget.name} è stato eliminato!`);
                                 
                                 // Show elimination notification
-                                if (target.name === gameState.playerName && !gameState.isMaster) {
+                                if (finalTarget.name === gameState.playerName && !gameState.isMaster) {
                                     setTimeout(() => showEliminatedNotification(), 500);
                                 }
                                 
@@ -3558,7 +3604,7 @@
                             }
                             
                             // === BOIA ESECUTORE ===
-                            if (shooter.boiaEsecutore && shooter.boiaEsecutoreTurns > 0 && target.isEliminated) {
+                            if (shooter.boiaEsecutore && shooter.boiaEsecutoreTurns > 0 && finalTarget.isEliminated) {
                                 let nextPlayerIndex = (result.targetIndex + 1) % gameState.players.length;
                                 let attempts = 0;
                                 while (gameState.players[nextPlayerIndex].isEliminated && attempts < gameState.players.length) {
@@ -3605,7 +3651,7 @@
                             playSound('hit');
                             
                             // Visual effects for the player who got hit
-                            if (target.name === gameState.playerName) {
+                            if (finalTarget.name === gameState.playerName) {
                                 screenFlash('damage');
                                 createParticles(window.innerWidth / 2, window.innerHeight / 2, 'damage');
                             }
@@ -3615,7 +3661,7 @@
                         
                         // Add multiplier info to history
                         if (multiplier !== 1) {
-                            gameState.history.push(`✨ ${target.name} ha un moltiplicatore x${multiplier}! Danno effettivo: ${actualDamage}`);
+                            gameState.history.push(`✨ ${finalTarget.name} ha un moltiplicatore x${multiplier}! Danno effettivo: ${actualDamage}`);
                         }
                     }
                 }
@@ -4501,8 +4547,12 @@
             // Set multiplier for selected players
             const currentPlayerIndex = gameState.currentTurn;
             
+            let alreadyHasMultiplier = [];
             selectedIndices.forEach(index => {
                 const player = gameState.players[index];
+                if (player.multiplier !== 1) {
+                    alreadyHasMultiplier.push(player.name);
+                }
                 player.multiplier = multiplierValue;
                 player.multiplierAppliedBy = currentPlayerIndex; // Salva chi ha applicato il moltiplicatore
                 
@@ -4512,6 +4562,11 @@
                 }
                 player.temporaryEffects.multiplier = true;
             });
+            
+            // Avvisa se alcuni giocatori avevano già un moltiplicatore
+            if (alreadyHasMultiplier.length > 0) {
+                gameState.history.push(`⚠️ Moltiplicatore precedente sovrascritto per: ${alreadyHasMultiplier.join(', ')}`);
+            }
             
             // Update Firebase
             database.ref('games/' + gameState.gameCode + '/players').set(gameState.players);
@@ -5054,6 +5109,7 @@
             const dice1 = parseInt(document.getElementById('tcalc-dice-0').value);
             const dice2 = parseInt(document.getElementById('tcalc-dice-1').value);
             const dice3 = parseInt(document.getElementById('tcalc-dice-2').value);
+            const selectedDirection = document.getElementById('target-calc-direction').value;
             const resultDiv = document.getElementById('target-calc-result');
             
             const diceValues = [];
@@ -5067,7 +5123,7 @@
             }
             
             const sum = diceValues.reduce((a, b) => a + b, 0);
-            const targetInfo = findTargetInfo(sum, gameState.currentTurn);
+            const targetInfo = findTargetInfo(sum, gameState.currentTurn, selectedDirection);
             
             resultDiv.style.display = 'block';
             resultDiv.innerHTML = `
@@ -5078,17 +5134,18 @@
                     🎯 Bersaglio: <strong>${targetInfo.targetName}</strong>
                 </div>
                 <div style="font-size: 0.9em; margin-top: 8px; opacity: 0.8;">
-                    (${targetInfo.position}° giocatore attivo in senso ${gameState.direction === 'clockwise' ? 'orario' : 'antiorario'})
+                    (${targetInfo.position}° giocatore attivo in senso ${selectedDirection === 'clockwise' ? 'orario' : 'antiorario'})
                 </div>
             `;
             
             if (gameState.isMaster) {
-                gameState.history.push(`🎯 Calcolo bersaglio: ${diceValues.join(',')} = ${sum} → ${targetInfo.targetName}`);
+                const directionText = selectedDirection === 'clockwise' ? 'orario' : 'antiorario';
+                gameState.history.push(`🎯 Calcolo bersaglio (${directionText}): ${diceValues.join(',')} = ${sum} → ${targetInfo.targetName}`);
                 database.ref('games/' + gameState.gameCode + '/history').set(gameState.history);
             }
         }
 
-        function findTargetInfo(sum, shooterIndex) {
+        function findTargetInfo(sum, shooterIndex, direction = null) {
             const activePlayers = gameState.players
                 .map((p, i) => ({ player: p, index: i }))
                 .filter(({ player, index }) => !player.isEliminated && index !== shooterIndex);
@@ -5098,8 +5155,11 @@
             let count = sum % activePlayers.length;
             if (count === 0) count = activePlayers.length;
 
+            // Usa la direzione passata come parametro, altrimenti usa quella di gameState
+            const actualDirection = direction || gameState.direction;
+            
             let sorted;
-            if (gameState.direction === 'clockwise') {
+            if (actualDirection === 'clockwise') {
                 sorted = [...activePlayers].sort((a, b) => {
                     const aAfter = a.index > shooterIndex ? a.index : a.index + 1000;
                     const bAfter = b.index > shooterIndex ? b.index : b.index + 1000;
@@ -5139,6 +5199,12 @@
             gameState.globalEffects.cessateFuoco = !gameState.globalEffects.cessateFuoco;
             
             if (gameState.globalEffects.cessateFuoco) {
+                // Disattiva Zebratura se attiva (conflitto)
+                if (gameState.globalEffects.zebratura) {
+                    gameState.globalEffects.zebratura = false;
+                    gameState.globalEffects.zebraturaActivator = null;
+                    gameState.history.push(`⚠️ Zebratura disattivata (conflitto con Cessate il Fuoco)`);
+                }
                 gameState.globalEffects.cessateFuocoActivator = activatorIndex;
                 gameState.history.push(`🕊️ Cessate il Fuoco attivato per 1 turno completo! Attivatore: ${gameState.players[activatorIndex].name}`);
             } else {
@@ -5269,8 +5335,14 @@
             gameState.globalEffects.capsulaRigenerativa = !gameState.globalEffects.capsulaRigenerativa;
             
             if (gameState.globalEffects.capsulaRigenerativa) {
+                // Disattiva Zebratura se attiva (conflitto)
+                if (gameState.globalEffects.zebratura) {
+                    gameState.globalEffects.zebratura = false;
+                    gameState.globalEffects.zebraturaActivator = null;
+                    gameState.history.push(`⚠️ Zebratura disattivata (conflitto con Capsula Rigenerativa)`);
+                }
                 gameState.globalEffects.capsulaRigenerativaActivator = activatorIndex;
-                gameState.history.push(`💊 Capsula Rigenerativa attivata per 1 turno completo (incluso attivatore)! Attivatore: ${gameState.players[currentPlayerIndex].name}`);
+                gameState.history.push(`💊 Capsula Rigenerativa attivata per 1 turno completo (incluso attivatore)! Attivatore: ${gameState.players[activatorIndex].name}`);
             } else {
                 gameState.globalEffects.capsulaRigenerativaActivator = null;
                 gameState.history.push(`💊 Capsula Rigenerativa disattivata`);
@@ -5903,6 +5975,18 @@
             if (!gameState.isMaster) return;
             const playerIndex = parseInt(document.getElementById('zebratura-player').value);
             if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            // Disattiva Capsula Rigenerativa se attiva (conflitto)
+            if (gameState.globalEffects.capsulaRigenerativa) {
+                gameState.globalEffects.capsulaRigenerativa = false;
+                gameState.globalEffects.capsulaRigenerativaActivator = null;
+                gameState.history.push(`⚠️ Capsula Rigenerativa disattivata (conflitto con Zebratura)`);
+            }
+            // Disattiva Cessate Fuoco se attivo (conflitto)
+            if (gameState.globalEffects.cessateFuoco) {
+                gameState.globalEffects.cessateFuoco = false;
+                gameState.globalEffects.cessateFuocoActivator = null;
+                gameState.history.push(`⚠️ Cessate il Fuoco disattivato (conflitto con Zebratura)`);
+            }
             gameState.globalEffects.zebratura = true;
             gameState.globalEffects.zebraturaActivator = playerIndex;
             gameState.history.push(`🦓 Zebratura attivata! Attivatore: ${gameState.players[playerIndex].name} (fino al suo prossimo turno)`);
@@ -5921,6 +6005,12 @@
             if (!gameState.isMaster) return;
             const playerIndex = parseInt(document.getElementById('boomerang-player').value);
             if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            // Disattiva Armatura Specchio se attiva (conflitto)
+            if (gameState.globalEffects.armaturaSpecchio) {
+                gameState.globalEffects.armaturaSpecchio = false;
+                gameState.globalEffects.armaturaSpecchioActivator = null;
+                gameState.history.push(`⚠️ Armatura Specchio disattivata (conflitto con Boomerang)`);
+            }
             gameState.globalEffects.boomerang = true;
             gameState.globalEffects.boomerangActivator = playerIndex;
             gameState.globalEffects.boomerangDamage = 0;
@@ -5941,6 +6031,13 @@
             if (!gameState.isMaster) return;
             const playerIndex = parseInt(document.getElementById('armatura-specchio-player').value);
             if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            // Disattiva Boomerang se attivo (conflitto)
+            if (gameState.globalEffects.boomerang) {
+                gameState.globalEffects.boomerang = false;
+                gameState.globalEffects.boomerangActivator = null;
+                gameState.globalEffects.boomerangDamage = 0;
+                gameState.history.push(`⚠️ Boomerang disattivato (conflitto con Armatura Specchio)`);
+            }
             gameState.globalEffects.armaturaSpecchio = true;
             gameState.globalEffects.armaturaSpecchioActivator = playerIndex;
             gameState.history.push(`🪞 Armatura a Specchio attivata! ${gameState.players[playerIndex].name} distribuisce danni (fino al suo prossimo turno)`);
