@@ -1347,23 +1347,26 @@
             </div>
         </div>
 
-        <!-- Game Screen -->
+        <!-- ==========================================
+             GAME SCREEN COMPLETAMENTE RINNOVATA
+             ========================================== -->
         <div id="game-screen" class="game-screen hidden">
-            <div class="timer" id="timer">Tempo: 00:00</div>
             
-            <div class="direction-indicator" id="direction">
-                Direzione: ⭮ Oraria
-            </div>
+            <!-- Timer e Direzione -->
+            <div class="timer" id="timer">Tempo: 00:00</div>
+            <div class="direction-indicator" id="direction">Direzione: ⭮ Oraria</div>
 
-            <div id="current-turn" style="text-align: center; font-size: 1.2em; color: #ffd700; margin: 15px 0;">
-                Turno di: <strong id="turn-player"></strong>
+            <!-- Turno Corrente - Più Prominente -->
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 212, 255, 0.15) 100%); border: 3px solid rgba(0, 255, 136, 0.6); border-radius: 16px; padding: 16px; margin: 15px 0; text-align: center; box-shadow: 0 6px 20px rgba(0, 255, 136, 0.3);">
+                <div style="font-size: 0.9em; color: rgba(255, 255, 255, 0.7); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">È il turno di</div>
+                <div id="turn-player" style="font-size: 1.8em; font-weight: 900; color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.8); letter-spacing: 1px;">-</div>
             </div>
 
             <!-- Dice Calculator -->
             <div class="dice-calculator" id="dice-calculator">
-                <h3 style="color: #ffd700; text-align: center;">Calcolatore Dadi</h3>
+                <h3 style="color: #ffd700; text-align: center; margin-bottom: 15px;">🎲 Calcolatore Dadi</h3>
                 <div class="dice-inputs" id="dice-inputs"></div>
-                <button id="calculate-btn">Calcola e Applica</button>
+                <button id="calculate-btn" style="margin-top: 15px;">⚡ Calcola e Applica</button>
                 <div class="result-display hidden" id="result-display">
                     <h3>Risultato</h3>
                     <div id="result-text"></div>
@@ -1375,565 +1378,339 @@
 
             <!-- Leaderboard -->
             <div class="leaderboard">
-                <h3>📊 Classifica</h3>
+                <h3>🏆 Classifica Giocatori</h3>
                 <div id="leaderboard-list"></div>
             </div>
 
             <!-- History -->
-            <div class="history" id="history"></div>
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <span>📜</span>
+                    <span>Storico Partita</span>
+                </h3>
+                <div class="history" id="history"></div>
+            </div>
 
-            <!-- Master Controls -->
-                        <!-- Master Controls -->
+            <!-- ==========================================
+                 MASTER CONTROLS - RIORGANIZZATI IN 4 SEZIONI
+                 ========================================== -->
             <div id="master-controls" class="master-controls hidden">
-                <h3>👑 Controlli Master</h3>
+                <h3 style="text-align: center; font-size: 1.5em; margin-bottom: 20px;">👑 Controlli Master</h3>
                 
-                <!-- Calcolatrice Avanzata -->
-                <details class="control-category">
-                    <summary>🧮 Strumenti di Calcolo</summary>
+                <!-- PANNELLO EFFETTI ATTIVI -->
+                <div class="active-effects-panel" id="active-effects-panel" style="display: none;">
+                    <h4>⚡ Effetti Attualmente Attivi</h4>
+                    <div class="active-effects-grid" id="active-effects-grid"></div>
+                </div>
+
+                <!-- SEZIONE 1: AZIONI RAPIDE (sempre aperta) -->
+                <div class="master-quick-actions">
+                    <h4>⚡ Azioni Rapide</h4>
+                    <div class="quick-action-grid">
+                        <button id="reverse-direction-btn" class="quick-action-btn secondary">🔄 Inverti Direzione</button>
+                        <button id="rollback-btn" class="quick-action-btn secondary">↩️ Annulla Ultima</button>
+                    </div>
+                    
+                    <div style="margin-top: 16px;">
+                        <label style="font-size: 1em;">⏭️ Cambio Turno Manuale</label>
+                        <select id="next-turn-player" style="margin-top: 8px;"></select>
+                        <button id="change-turn-btn" class="quick-action-btn" style="margin-top: 8px;">Cambia Turno</button>
+                    </div>
+                    
+                    <div style="margin-top: 16px;">
+                        <label style="font-size: 1em;">💥 Danni/Cure Rapide</label>
+                        <label style="font-size: 0.85em; color: #888; margin-top: 6px;">Attivatore:</label>
+                        <select id="damage-activator-select" style="margin-top: 4px;"></select>
+                        <label style="font-size: 0.85em; color: #888; margin-top: 8px;">Bersagli (Ctrl/Cmd per multipli):</label>
+                        <select id="target-players" multiple size="4" style="margin-top: 4px;"></select>
+                        <div class="hp-modifier" style="margin-top: 8px;">
+                            <input type="number" id="hp-amount" placeholder="Valore HP">
+                            <button id="damage-btn">💥 Danno</button>
+                            <button id="heal-btn" class="success">💚 Cura</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEZIONE 2: EFFETTI SU GIOCATORI -->
+                <details class="control-category" open>
+                    <summary>🎯 Effetti su Giocatori Specifici</summary>
                     <div class="category-content">
-                        <div class="input-group">
-                            <label>Calcolatrice (somma/sottrazione fino a 20 numeri)</label>
-                            <div id="calculator-inputs" style="display: flex; flex-direction: column; gap: 8px; margin: 10px 0;">
-                                <input type="text" id="calc-input" placeholder="Es: 5 + 3 - 2 + 10" style="font-size: 1.1em;">
-                                <div style="display: flex; gap: 10px;">
-                                    <button onclick="calculateExpression()" style="flex: 1;">= Calcola</button>
-                                    <button onclick="clearCalculator()" style="flex: 1; background: #dc3545;">🗑️ Pulisci</button>
+                        
+                        <!-- Effetti Permanenti -->
+                        <div style="background: rgba(233, 30, 99, 0.1); border: 2px solid rgba(233, 30, 99, 0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                            <h5 style="color: #e91e63; margin: 0 0 12px 0; font-size: 1em;">♾️ Effetti Permanenti</h5>
+                            
+                            <div class="input-group">
+                                <label>🐙 Marchio del Kraken</label>
+                                <select id="kraken-mark-players" multiple size="4"></select>
+                                <button id="toggle-kraken-mark-btn" style="background: linear-gradient(135deg, #1a0033 0%, #330066 100%); border: 2px solid #9933ff;">Attiva/Disattiva</button>
+                                <div style="font-size: 0.8em; color: #ff6b6b; margin-top: 6px; padding: 6px; background: rgba(255,0,0,0.1); border-radius: 6px;">
+                                    ⚠️ Eliminazione a 10 HP o meno
                                 </div>
-                                <div id="calc-result" style="background: rgba(0,255,255,0.1); padding: 12px; border-radius: 8px; display: none; font-size: 1.2em; font-weight: 700; color: #00ffff; text-align: center;"></div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>♟️ Scacco Matto</label>
+                                <select id="checkmate-players" multiple size="4"></select>
+                                <div class="hp-modifier">
+                                    <input type="number" id="checkmate-value" placeholder="HP eliminazione" min="1" max="100" value="30">
+                                    <button id="set-checkmate-btn" style="background: linear-gradient(135deg, #1a0033 0%, #4d0000 100%); border: 2px solid #ff3333;">Imposta</button>
+                                    <button id="remove-checkmate-btn" class="danger">Rimuovi</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Effetti Temporanei -->
+                        <div style="background: rgba(33, 150, 243, 0.1); border: 2px solid rgba(33, 150, 243, 0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                            <h5 style="color: #2196f3; margin: 0 0 12px 0; font-size: 1em;">⏱️ Effetti Temporanei (1 Turno)</h5>
+                            
+                            <div class="input-group">
+                                <label>⭐ Immortalità</label>
+                                <select id="immortal-players" multiple size="4"></select>
+                                <button id="toggle-immortality-btn">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>⚔️ Moltiplicatore Danni/Cure</label>
+                                <select id="multiplier-players" multiple size="4"></select>
+                                <div class="hp-modifier">
+                                    <button id="set-multiplier-half-btn" style="background: linear-gradient(135deg, #1a4d1a 0%, #2d7a2d 100%);">🛡️ x0.5</button>
+                                    <button id="set-multiplier-double-btn" style="background: linear-gradient(135deg, #4d1a1a 0%, #7a2d2d 100%);">⚔️ x2</button>
+                                    <button id="remove-multiplier-btn" class="danger">Rimuovi</button>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>⏭️ Salta Turno</label>
+                                <select id="skip-turn-players" multiple size="4"></select>
+                                <button id="toggle-skip-turn-btn">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>💫 Conversione Danni → Cure</label>
+                                <select id="damage-to-heal-players" multiple size="4"></select>
+                                <button id="toggle-damage-to-heal-btn" style="background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>☀️ Armatura del Sole</label>
+                                <select id="sun-armor-players" multiple size="4"></select>
+                                <button id="toggle-sun-armor-btn" style="background: linear-gradient(135deg, #ff8c00 0%, #ffd700 100%);">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>🌙 Armatura della Luna</label>
+                                <select id="moon-armor-players" multiple size="4"></select>
+                                <button id="toggle-moon-armor-btn" style="background: linear-gradient(135deg, #191970 0%, #4169e1 100%);">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>🎲 Dadi Personalizzati</label>
+                                <select id="custom-dice-players" multiple size="4"></select>
+                                <div class="hp-modifier">
+                                    <input type="number" id="custom-dice-value" placeholder="Numero dadi (1-6)" min="1" max="6" value="3">
+                                    <button id="set-custom-dice-btn">Imposta Dadi</button>
+                                    <button id="remove-custom-dice-btn" class="danger">Rimuovi</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meccaniche Speciali su Singoli -->
+                        <div style="background: rgba(156, 39, 176, 0.1); border: 2px solid rgba(156, 39, 176, 0.3); border-radius: 12px; padding: 15px;">
+                            <h5 style="color: #9c27b0; margin: 0 0 12px 0; font-size: 1em;">🎭 Meccaniche Speciali</h5>
+                            
+                            <div class="input-group">
+                                <label>🌊 Un Mare di Guai</label>
+                                <select id="mare-guai-players" multiple size="4"></select>
+                                <button id="toggle-mare-guai-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);">Attiva/Disattiva</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>🌞 Talismano di Ra</label>
+                                <select id="talismano-ra-player"></select>
+                                <div style="display: flex; gap: 8px; margin: 8px 0;">
+                                    <input type="number" id="talismano-ra-val1" placeholder="Dado 1" min="1" max="6" style="flex: 1;">
+                                    <input type="number" id="talismano-ra-val2" placeholder="Dado 2" min="1" max="6" style="flex: 1;">
+                                </div>
+                                <button id="set-talismano-ra-btn" style="background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);">Imposta</button>
+                                <button id="remove-talismano-ra-btn" class="danger">Rimuovi</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>☠️ Dado Avvelenato</label>
+                                <select id="dado-avvelenato-player"></select>
+                                <div style="display: flex; gap: 8px; margin: 8px 0;">
+                                    <input type="number" id="dado-avvelenato-val1" placeholder="Dado 1" min="1" max="6" style="flex: 1;">
+                                    <input type="number" id="dado-avvelenato-val2" placeholder="Dado 2" min="1" max="6" style="flex: 1;">
+                                </div>
+                                <button id="set-dado-avvelenato-btn" style="background: linear-gradient(135deg, #4A148C 0%, #7B1FA2 100%);">Imposta</button>
+                                <button id="remove-dado-avvelenato-btn" class="danger">Rimuovi</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- SEZIONE 3: EFFETTI GLOBALI -->
+                <details class="control-category">
+                    <summary>🌍 Effetti Globali (Tutti i Giocatori)</summary>
+                    <div class="category-content">
+                        
+                        <div class="input-group">
+                            <label>🪆 Bambola Voodoo</label>
+                            <select id="bambola-voodoo-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-bambola-voodoo-btn" style="background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);">Attiva/Disattiva</button>
+                            <div style="font-size: 0.8em; color: #9C27B0; margin-top: 6px; padding: 6px; background: rgba(156,39,176,0.1); border-radius: 6px;">
+                                💡 1 turno: danni a sé stessi
                             </div>
                         </div>
                         
                         <div class="input-group">
-                            <label>Calcolo Bersaglio (senza applicare danno)</label>
+                            <label>💥 Cannone del Karma</label>
+                            <select id="cannone-karma-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-cannone-karma-btn" style="background: linear-gradient(135deg, #F44336 0%, #B71C1C 100%);">Attiva/Disattiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>☔ Pioggia Acida</label>
+                            <select id="pioggia-acida-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-pioggia-acida-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #FFC107 100%);">Attiva/Disattiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>💊 Capsula Rigenerativa</label>
+                            <select id="capsula-rigenerativa-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-capsula-rigenerativa-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #03A9F4 100%);">Attiva/Disattiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🏖️ Saldi Estivi</label>
+                            <select id="saldi-estivi-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-saldi-estivi-btn" style="background: linear-gradient(135deg, #FFEB3B 0%, #FFC107 100%);">Attiva/Disattiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>⚖️ Gioco Pulito</label>
+                            <select id="gioco-pulito-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-gioco-pulito-btn" style="background: linear-gradient(135deg, #607D8B 0%, #90A4AE 100%);">Attiva/Disattiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🌀 Trottola Impazzita</label>
+                            <button id="trottola-impazzita-btn" style="background: linear-gradient(135deg, #9C27B0 0%, #673AB7 100%);">⚡ Attiva</button>
+                            <div style="font-size: 0.8em; color: #9C27B0; margin-top: 6px; padding: 6px; background: rgba(156,39,176,0.1); border-radius: 6px;">
+                                💡 Immediato: trasferisce HP al prossimo
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🐢🐰 Tartaruga e Lepre</label>
+                            <button id="tartaruga-lepre-btn" style="background: linear-gradient(135deg, #8BC34A 0%, #CDDC39 100%);">⚡ Attiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>☯️ Yin e Yang</label>
+                            <button id="yin-yang-btn" style="background: linear-gradient(135deg, #000000 0%, #FFFFFF 100%); color: #FFD700;">⚡ Attiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>⚖️ Bilancia del Fato</label>
+                            <button id="bilancia-fato-btn" style="background: linear-gradient(135deg, #795548 0%, #A1887F 100%);">⚡ Attiva</button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>⚖️ Uguaglianza</label>
+                            <div class="hp-modifier">
+                                <input type="number" id="uguaglianza-divisor" placeholder="Divisore (1-18)" min="1" max="18" value="1">
+                                <button id="uguaglianza-btn" style="background: linear-gradient(135deg, #3F51B5 0%, #5C6BC0 100%);">⚡ Attiva</button>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🔥 Geyser di Fuoco</label>
+                            <div class="hp-modifier">
+                                <input type="number" id="geyser-damage" placeholder="Danno base" min="1" max="100" value="6">
+                                <button id="geyser-fuoco-btn" style="background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);">⚡ Attiva</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- SEZIONE 4: STRUMENTI AVANZATI -->
+                <details class="control-category">
+                    <summary>🔧 Strumenti Avanzati</summary>
+                    <div class="category-content">
+                        
+                        <div class="input-group">
+                            <label>🧮 Calcolatrice</label>
+                            <input type="text" id="calc-input" placeholder="Es: 5 + 3 - 2 + 10" style="font-size: 1em;">
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <button onclick="calculateExpression()" style="flex: 1;">= Calcola</button>
+                                <button onclick="clearCalculator()" style="flex: 1; background: #dc3545;">🗑️ Pulisci</button>
+                            </div>
+                            <div id="calc-result" style="background: rgba(0,255,255,0.1); padding: 10px; border-radius: 6px; display: none; font-size: 1.2em; font-weight: 700; color: #00ffff; text-align: center; margin-top: 8px;"></div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🎯 Calcolo Bersaglio (solo calcolo)</label>
                             <div class="dice-inputs" id="target-calc-dice">
                                 <div class="dice-input"><input type="number" id="tcalc-dice-0" min="1" max="6" placeholder="D1"></div>
                                 <div class="dice-input"><input type="number" id="tcalc-dice-1" min="1" max="6" placeholder="D2"></div>
                                 <div class="dice-input"><input type="number" id="tcalc-dice-2" min="1" max="6" placeholder="D3"></div>
                             </div>
-                            <div style="margin: 10px 0;">
-                                <label style="font-size: 0.9em; color: #888;">Direzione:</label>
-                                <select id="target-calc-direction" style="margin-left: 8px; padding: 4px 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 4px;">
+                            <div style="margin: 8px 0;">
+                                <label style="font-size: 0.85em; color: #888;">Direzione:</label>
+                                <select id="target-calc-direction" style="margin-left: 6px; padding: 4px 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 4px;">
                                     <option value="clockwise">🔄 Orario</option>
                                     <option value="counterclockwise">🔃 Antiorario</option>
                                 </select>
                             </div>
-                            <button onclick="calculateTargetOnly()">🎯 Calcola Bersaglio</button>
-                            <div id="target-calc-result" style="background: rgba(255,0,255,0.1); padding: 12px; border-radius: 8px; display: none; margin-top: 10px; color: #ff00ff; font-weight: 600;"></div>
-                        </div>
-                    </div>
-                </details>
-
-                <!-- Controlli Base -->
-                <details class="control-category">
-                    <summary>⚙️ Controlli Base</summary>
-                    <div class="category-content">
-                        <div class="control-group">
-                            <button id="reverse-direction-btn">🔄 Inverti Direzione</button>
-                            <button id="rollback-btn">↩️ Annulla Ultima</button>
+                            <button onclick="calculateTargetOnly()">🎯 Calcola</button>
+                            <div id="target-calc-result" style="background: rgba(255,0,255,0.1); padding: 10px; border-radius: 6px; display: none; margin-top: 8px; color: #ff00ff; font-weight: 600;"></div>
                         </div>
                         
                         <div class="input-group">
-                            <label>Mostra QR Code per Rientro</label>
+                            <label>📱 QR Code Rientro Giocatore</label>
                             <select id="qr-player-select"></select>
-                            <button id="show-qr-btn">📱 Mostra QR Code</button>
+                            <button id="show-qr-btn">📱 Mostra QR</button>
                         </div>
                         
                         <div class="input-group">
-                            <label>Cambia Turno</label>
-                            <select id="next-turn-player"></select>
-                            <button id="change-turn-btn">⏭️ Cambia Turno</button>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Applica Danni Personalizzati (con attivazione effetti)</label>
-                            <label style="font-size: 0.9em; color: #888;">Attivatore (chi infligge i danni):</label>
-                            <select id="damage-activator-select"></select>
-                            <label style="font-size: 0.9em; color: #888; margin-top: 8px;">Bersagli (tieni premuto Ctrl/Cmd per multipli):</label>
-                            <select id="target-players" multiple size="5"></select>
-                            <div class="hp-modifier">
-                                <input type="number" id="hp-amount" placeholder="Valore HP">
-                                <button id="damage-btn">💥 Danno (con effetti)</button>
-                                <button id="heal-btn">💚 Cura</button>
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Scambia HP tra Giocatori</label>
+                            <label>🔄 Scambio HP tra Giocatori</label>
                             <select id="swap-player-1"></select>
-                            <select id="swap-player-2" style="margin-top: 10px;"></select>
-                            <button id="swap-hp-btn">🔄 Scambia HP</button>
+                            <select id="swap-player-2" style="margin-top: 8px;"></select>
+                            <button id="swap-hp-btn" style="margin-top: 8px;">🔄 Scambia HP</button>
                         </div>
                     </div>
                 </details>
 
-                <!-- Effetti Permanenti -->
-                <details class="control-category">
-                    <summary>♾️ Effetti Permanenti</summary>
-                    <div class="category-content">
-                        <div class="input-group">
-                            <label>Marchio del Kraken 🐙 (seleziona uno o più giocatori)</label>
-                            <select id="kraken-mark-players" multiple size="5"></select>
-                            <button id="toggle-kraken-mark-btn" style="background: linear-gradient(135deg, #1a0033 0%, #330066 100%); border: 2px solid #9933ff;">🐙 Attiva/Disattiva Marchio</button>
-                            <div style="font-size: 0.85em; color: #ff6b6b; margin-top: 8px; padding: 8px; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid rgba(255,0,0,0.3);">
-                                ⚠️ <strong>Effetto permanente:</strong> Eliminazione automatica a 10 HP o meno
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Scacco Matto ♟️ (seleziona uno o più giocatori)</label>
-                            <select id="checkmate-players" multiple size="5"></select>
-                            <div class="hp-modifier">
-                                <input type="number" id="checkmate-value" placeholder="HP di eliminazione" min="1" max="100" value="30">
-                                <button id="set-checkmate-btn" style="background: linear-gradient(135deg, #1a0033 0%, #4d0000 100%); border: 2px solid #ff3333;">♟️ Imposta Scacco Matto</button>
-                                <button id="remove-checkmate-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            </div>
-                            <div style="font-size: 0.85em; color: #ff6b6b; margin-top: 8px; padding: 8px; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid rgba(255,0,0,0.3);">
-                                ⚠️ <strong>Effetto permanente:</strong> Eliminazione automatica al valore HP specificato
-                            </div>
-                        </div>
-                    </div>
-                </details>
+            </div>
+        </div>
 
-                <!-- Effetti Temporanei (1 Turno) -->
-                <details class="control-category">
-                    <summary>⏱️ Effetti Temporanei (1 Turno)</summary>
-                    <div class="category-content">
-                        <div class="input-group">
-                            <label>Immortalità (seleziona uno o più giocatori - Ctrl/Cmd per multipli)</label>
-                            <select id="immortal-players" multiple size="5"></select>
-                            <button id="toggle-immortality-btn">⭐ Attiva/Disattiva Immortalità</button>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Moltiplicatore Danni/Cure (seleziona uno o più giocatori)</label>
-                            <select id="multiplier-players" multiple size="5"></select>
-                            <div class="hp-modifier">
-                                <button id="set-multiplier-half-btn" style="background: linear-gradient(135deg, #1a4d1a 0%, #2d7a2d 100%);">🛡️ Metà Danni (x0.5)</button>
-                                <button id="set-multiplier-double-btn" style="background: linear-gradient(135deg, #4d1a1a 0%, #7a2d2d 100%);">⚔️ Danni Doppi (x2)</button>
-                                <button id="remove-multiplier-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            </div>
-                            <div style="font-size: 0.85em; color: #aaa; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                                💡 Il moltiplicatore dura fino al prossimo turno di chi lo ha applicato
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Salta Turno (seleziona uno o più giocatori)</label>
-                            <select id="skip-turn-players" multiple size="5"></select>
-                            <button id="toggle-skip-turn-btn">⏭️ Attiva/Disattiva Salta Turno</button>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Conversione Danni → Cure 💫 (seleziona uno o più giocatori)</label>
-                            <select id="damage-to-heal-players" multiple size="5"></select>
-                            <button id="toggle-damage-to-heal-btn" style="background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);">💫 Attiva/Disattiva Conversione</button>
-                            <div style="font-size: 0.85em; color: #ff69b4; margin-top: 8px; padding: 8px; background: rgba(255,20,147,0.1); border-radius: 8px;">
-                                💡 Dura 1 turno - I danni subiti diventano cure
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Armatura del Sole ☀️ (seleziona uno o più giocatori)</label>
-                            <select id="sun-armor-players" multiple size="5"></select>
-                            <button id="toggle-sun-armor-btn" style="background: linear-gradient(135deg, #ff8c00 0%, #ffd700 100%);">☀️ Attiva/Disattiva Armatura Sole</button>
-                            <div style="font-size: 0.85em; color: #ffa500; margin-top: 8px; padding: 8px; background: rgba(255,140,0,0.1); border-radius: 8px;">
-                                💡 Dura 1 turno - Danni dispari diventano cure
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Armatura della Luna 🌙 (seleziona uno o più giocatori)</label>
-                            <select id="moon-armor-players" multiple size="5"></select>
-                            <button id="toggle-moon-armor-btn" style="background: linear-gradient(135deg, #191970 0%, #4169e1 100%);">🌙 Attiva/Disattiva Armatura Luna</button>
-                            <div style="font-size: 0.85em; color: #87ceeb; margin-top: 8px; padding: 8px; background: rgba(25,25,112,0.2); border-radius: 8px;">
-                                💡 Dura 1 turno - Danni pari diventano cure
-                            </div>
-                        </div>
+        <!-- Notifiche e Modali (da originale) -->
+        <div class="eliminated-notification" id="eliminated-notification">
+            <h2>💀 ELIMINATO! 💀</h2>
+        </div>
 
-                        <div class="input-group">
-                            <label>Dadi Personalizzati (seleziona uno o più giocatori)</label>
-                            <select id="custom-dice-players" multiple size="5"></select>
-                            <div class="hp-modifier">
-                                <input type="number" id="custom-dice-value" placeholder="Numero dadi (1-6)" min="1" max="6" value="3">
-                                <button id="set-custom-dice-btn">🎲 Imposta Dadi</button>
-                                <button id="remove-custom-dice-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            </div>
-                            <div style="font-size: 0.85em; color: #aaa; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                                💡 I dadi personalizzati durano solo per il prossimo turno del giocatore
-                            </div>
-                        </div>
-                    </div>
-                </details>
+        <div class="winner-notification" id="winner-notification">
+            <h2>🏆 VINCITORE! 🏆</h2>
+            <div class="winner-name" id="winner-name"></div>
+            <div class="game-stats" id="game-stats"></div>
+        </div>
 
-<!-- Continua nel prossimo messaggio... -->
-                <!-- Nuove Meccaniche Globali -->
-                <details class="control-category">
-                    <summary>🌍 Meccaniche Globali (Tutti i Giocatori)</summary>
-                    <div class="category-content">
-                        <div class="input-group">
-                            <label>Cessate il Fuoco 🕊️</label>
-                            <select id="cessate-fuoco-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-cessate-fuoco-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);">🕊️ Attiva/Disattiva Cessate il Fuoco</button>
-                            <div style="font-size: 0.85em; color: #4CAF50; margin-top: 8px; padding: 8px; background: rgba(76,175,80,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo: tutti curano invece di danneggiare. L'attivatore si cura della metà del danno di ogni giocata altrui
-                            </div>
-                        </div>
+        <div class="hit-overlay" id="hit-overlay"></div>
 
-                        <div class="input-group">
-                            <label>Di Pari Pazzo 🎲</label>
-                            <select id="pari-pazzo-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-pari-pazzo-btn" style="background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);">🎲 Attiva/Disattiva Di Pari Pazzo</button>
-                            <div style="font-size: 0.85em; color: #FF5722; margin-top: 8px; padding: 8px; background: rgba(255,87,34,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo: chi ottiene somma pari subisce danno pari alla propria giocata
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Bambola Voodoo 🪆</label>
-                            <select id="bambola-voodoo-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-bambola-voodoo-btn" style="background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);">🪆 Attiva/Disattiva Bambola Voodoo</button>
-                            <div style="font-size: 0.85em; color: #9C27B0; margin-top: 8px; padding: 8px; background: rgba(156,39,176,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo (escluso attivatore): ogni giocatore infligge danni a sé stesso
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Cannone del Karma 💥</label>
-                            <select id="cannone-karma-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-cannone-karma-btn" style="background: linear-gradient(135deg, #F44336 0%, #B71C1C 100%);">💥 Attiva/Disattiva Cannone Karma</button>
-                            <div style="font-size: 0.85em; color: #F44336; margin-top: 8px; padding: 8px; background: rgba(244,67,54,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo (escluso attivatore): tutti infliggono danni sia al bersaglio che a sé stessi
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Pioggia Acida ☔</label>
-                            <select id="pioggia-acida-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-pioggia-acida-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #FFC107 100%);">☔ Attiva/Disattiva Pioggia Acida</button>
-                            <div style="font-size: 0.85em; color: #4CAF50; margin-top: 8px; padding: 8px; background: rgba(76,175,80,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo (escluso attivatore): ogni giocatore subisce danno pari al dado più alto ottenuto
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Capsula Rigenerativa 💊</label>
-                            <select id="capsula-rigenerativa-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-capsula-rigenerativa-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #03A9F4 100%);">💊 Attiva/Disattiva Capsula Rigenerativa</button>
-                            <div style="font-size: 0.85em; color: #00BCD4; margin-top: 8px; padding: 8px; background: rgba(0,188,212,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo (incluso attivatore): ogni lancio fa guadagnare punti vita
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Saldi Estivi 🏖️</label>
-                            <select id="saldi-estivi-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-saldi-estivi-btn" style="background: linear-gradient(135deg, #FFEB3B 0%, #FFC107 100%);">🏖️ Attiva/Disattiva Saldi Estivi</button>
-                            <div style="font-size: 0.85em; color: #FFC107; margin-top: 8px; padding: 8px; background: rgba(255,193,7,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo: tutti i danni inflitti sono dimezzati
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Gioco Pulito ⚖️</label>
-                            <select id="gioco-pulito-activator" style="margin-bottom: 10px;">
-                                <option value="">Seleziona Attivatore</option>
-                            </select>
-                            <button id="toggle-gioco-pulito-btn" style="background: linear-gradient(135deg, #607D8B 0%, #90A4AE 100%);">⚖️ Attiva/Disattiva Gioco Pulito</button>
-                            <div style="font-size: 0.85em; color: #607D8B; margin-top: 8px; padding: 8px; background: rgba(96,125,139,0.1); border-radius: 8px;">
-                                💡 Per 1 turno completo: annulla coppie/tris e disattiva tutti gli altri effetti
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Trottola Impazzita 🌀</label>
-                            <button id="trottola-impazzita-btn" style="background: linear-gradient(135deg, #9C27B0 0%, #673AB7 100%);">🌀 Attiva Trottola Impazzita</button>
-                            <div style="font-size: 0.85em; color: #9C27B0; margin-top: 8px; padding: 8px; background: rgba(156,39,176,0.1); border-radius: 8px;">
-                                💡 Effetto immediato: trasferisce tutti gli HP al giocatore successivo nel senso di gioco
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>La Tartaruga e la Lepre 🐢🐰</label>
-                            <button id="tartaruga-lepre-btn" style="background: linear-gradient(135deg, #8BC34A 0%, #CDDC39 100%);">🐢🐰 Attiva Tartaruga e Lepre</button>
-                            <div style="font-size: 0.85em; color: #8BC34A; margin-top: 8px; padding: 8px; background: rgba(139,195,74,0.1); border-radius: 8px;">
-                                💡 Effetto immediato: il giocatore con più HP perde metà HP, distribuiti agli altri
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Yin e Yang ☯️</label>
-                            <button id="yin-yang-btn" style="background: linear-gradient(135deg, #000000 0%, #FFFFFF 100%); color: #FFD700;">☯️ Attiva Yin e Yang</button>
-                            <div style="font-size: 0.85em; color: #666; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; border: 1px solid #ccc;">
-                                💡 Effetto immediato: tutti i giocatori impostano HP a metà degli HP iniziali
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Bilancia del Fato ⚖️</label>
-                            <button id="bilancia-fato-btn" style="background: linear-gradient(135deg, #795548 0%, #A1887F 100%);">⚖️ Attiva Bilancia del Fato</button>
-                            <div style="font-size: 0.85em; color: #795548; margin-top: 8px; padding: 8px; background: rgba(121,85,72,0.1); border-radius: 8px;">
-                                💡 Effetto immediato: differenza tra HP iniziali e attuali diventa il nuovo valore HP
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Uguaglianza ⚖️</label>
-                            <div class="hp-modifier">
-                                <input type="number" id="uguaglianza-divisor" placeholder="Divisore (1-18)" min="1" max="18" value="1">
-                                <button id="uguaglianza-btn" style="background: linear-gradient(135deg, #3F51B5 0%, #5C6BC0 100%);">⚖️ Attiva Uguaglianza</button>
-                            </div>
-                            <div style="font-size: 0.85em; color: #3F51B5; margin-top: 8px; padding: 8px; background: rgba(63,81,181,0.1); border-radius: 8px;">
-                                💡 Effetto immediato: somma tutti gli HP, divide per il numero inserito, redistribuisce
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Geyser di Fuoco 🔥</label>
-                            <div class="hp-modifier">
-                                <input type="number" id="geyser-damage" placeholder="Danno base" min="1" max="100" value="6">
-                                <button id="geyser-fuoco-btn" style="background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);">🔥 Attiva Geyser di Fuoco</button>
-                            </div>
-                            <div style="font-size: 0.85em; color: #FF5722; margin-top: 8px; padding: 8px; background: rgba(255,87,34,0.1); border-radius: 8px;">
-                                💡 Effetto immediato: danni progressivi dal giocatore successivo (x1, x2, x3...). Attivatore immune
-                            </div>
-                        </div>
-                    </div>
-                </details>
-
-                <!-- Meccaniche Su Singoli Giocatori -->
-                <details class="control-category">
-                    <summary>👤 Meccaniche Su Singoli Giocatori</summary>
-                    <div class="category-content">
-                        <div class="input-group">
-                            <label>Un Mare di Guai 🌊 (seleziona uno o più giocatori)</label>
-                            <select id="mare-guai-players" multiple size="5"></select>
-                            <button id="toggle-mare-guai-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);">🌊 Attiva/Disattiva Mare di Guai</button>
-                            <div style="font-size: 0.85em; color: #00BCD4; margin-top: 8px; padding: 8px; background: rgba(0,188,212,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: se colpito, danno duplicato all'attaccante che salta il turno successivo
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Talismano di Ra 🌞 (seleziona giocatore e inserisci valori)</label>
-                            <select id="talismano-ra-player"></select>
-                            <div style="display: flex; gap: 10px; margin: 10px 0;">
-                                <input type="number" id="talismano-ra-val1" placeholder="Dado 1 (1-6)" min="1" max="6" style="flex: 1;">
-                                <input type="number" id="talismano-ra-val2" placeholder="Dado 2 (1-6)" min="1" max="6" style="flex: 1;">
-                            </div>
-                            <button id="set-talismano-ra-btn" style="background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);">🌞 Imposta Talismano Ra</button>
-                            <button id="remove-talismano-ra-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #FFC107; margin-top: 8px; padding: 8px; background: rgba(255,193,7,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: guadagna HP = prodotto dei dadi quando altri giocatori ottengono quei valori
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Dado Avvelenato ☠️ (seleziona giocatore e inserisci valori)</label>
-                            <select id="dado-avvelenato-player"></select>
-                            <div style="display: flex; gap: 10px; margin: 10px 0;">
-                                <input type="number" id="dado-avvelenato-val1" placeholder="Dado 1 (1-6)" min="1" max="6" style="flex: 1;">
-                                <input type="number" id="dado-avvelenato-val2" placeholder="Dado 2 (1-6)" min="1" max="6" style="flex: 1;">
-                            </div>
-                            <button id="set-dado-avvelenato-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);">☠️ Imposta Dado Avvelenato</button>
-                            <button id="remove-dado-avvelenato-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #4CAF50; margin-top: 8px; padding: 8px; background: rgba(76,175,80,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: infligge danni = prodotto dei dadi a chi ottiene quei valori
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Interferenza 🔀 (seleziona 2 giocatori)</label>
-                            <select id="interferenza-player1"></select>
-                            <select id="interferenza-player2" style="margin-top: 10px;"></select>
-                            <button id="set-interferenza-btn" style="background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);">🔀 Imposta Interferenza</button>
-                            <button id="remove-interferenza-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #9C27B0; margin-top: 8px; padding: 8px; background: rgba(156,39,176,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: quando player1 viene colpito, danni trasferiti a player2
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Volo della Fenice 🦅 (seleziona giocatore)</label>
-                            <select id="volo-fenice-players" multiple size="5"></select>
-                            <button id="toggle-volo-fenice-btn" style="background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);">🦅 Attiva/Disattiva Volo Fenice</button>
-                            <div style="font-size: 0.85em; color: #FF5722; margin-top: 8px; padding: 8px; background: rgba(255,87,34,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: riceve cure raddoppiate al posto dei danni
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Cactus Amari 🌵 (seleziona giocatore)</label>
-                            <select id="cactus-amari-players" multiple size="5"></select>
-                            <button id="toggle-cactus-amari-btn" style="background: linear-gradient(135deg, #8BC34A 0%, #AED581 100%);">🌵 Attiva/Disattiva Cactus Amari</button>
-                            <div style="font-size: 0.85em; color: #8BC34A; margin-top: 8px; padding: 8px; background: rgba(139,195,74,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: quando colpito, subisce danno e riflette il doppio all'attaccante
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Catena Maledetta ⛓️ (seleziona giocatore)</label>
-                            <select id="catena-maledetta-players" multiple size="5"></select>
-                            <button id="toggle-catena-maledetta-btn" style="background: linear-gradient(135deg, #607D8B 0%, #78909C 100%);">⛓️ Attiva/Disattiva Catena Maledetta</button>
-                            <div style="font-size: 0.85em; color: #607D8B; margin-top: 8px; padding: 8px; background: rgba(96,125,139,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: quando colpito, infligge stesso danno ai giocatori adiacenti
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Alta Marea 🌊 (seleziona attivatore)</label>
-                            <select id="alta-marea-player"></select>
-                            <button id="set-alta-marea-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);">🌊 Imposta Alta Marea</button>
-                            <button id="remove-alta-marea-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #00BCD4; margin-top: 8px; padding: 8px; background: rgba(0,188,212,0.1); border-radius: 8px;">
-                                💡 Fino al turno successivo dell'attivatore: HP>50% danni x2, HP<50% danni /2
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Zebratura 🦓 (seleziona attivatore)</label>
-                            <select id="zebratura-player"></select>
-                            <button id="set-zebratura-btn" style="background: linear-gradient(135deg, #000000 0%, #FFFFFF 100%); color: #FFD700;">🦓 Imposta Zebratura</button>
-                            <button id="remove-zebratura-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #666; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; border: 1px solid #ccc;">
-                                💡 Fino al turno successivo dell'attivatore: somme pari curano, somme dispari danneggiano
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Rifletti Danni 🛡️ (seleziona giocatore)</label>
-                            <select id="rifletti-danni-players" multiple size="5"></select>
-                            <button id="toggle-rifletti-danni-btn" style="background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);">🛡️ Attiva/Disattiva Rifletti Danni</button>
-                            <div style="font-size: 0.85em; color: #2196F3; margin-top: 8px; padding: 8px; background: rgba(33,150,243,0.1); border-radius: 8px;">
-                                💡 Per 1 turno: riflette danni ricevuti sull'attaccante
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Boomerang 🪃 (seleziona attivatore)</label>
-                            <select id="boomerang-player"></select>
-                            <button id="set-boomerang-btn" style="background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);">🪃 Imposta Boomerang</button>
-                            <button id="remove-boomerang-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #FF9800; margin-top: 8px; padding: 8px; background: rgba(255,152,0,0.1); border-radius: 8px;">
-                                💡 Fino al turno successivo: non subisce danni, che vengono accumulati e inflitti a tutti
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Armatura a Specchio 🪞 (seleziona attivatore)</label>
-                            <select id="armatura-specchio-player"></select>
-                            <button id="set-armatura-specchio-btn" style="background: linear-gradient(135deg, #00BCD4 0%, #80DEEA 100%);">🪞 Imposta Armatura Specchio</button>
-                            <button id="remove-armatura-specchio-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #00BCD4; margin-top: 8px; padding: 8px; background: rgba(0,188,212,0.1); border-radius: 8px;">
-                                💡 Fino al turno successivo: danni distribuiti equamente tra tutti (incluso sé stesso)
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Sabbie Mobili ⏳ (seleziona attivatore)</label>
-                            <select id="sabbie-mobili-player"></select>
-                            <button id="set-sabbie-mobili-btn" style="background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);">⏳ Imposta Sabbie Mobili</button>
-                            <button id="remove-sabbie-mobili-btn" style="background: #dc3545;">❌ Rimuovi</button>
-                            <div style="font-size: 0.85em; color: #FFC107; margin-top: 8px; padding: 8px; background: rgba(255,193,7,0.1); border-radius: 8px;">
-                                💡 Fino al turno successivo: ogni giocatore colpito salta il turno successivo (escluso attivatore)
-                            </div>
-                        </div>
-                    </div>
-                </details>
-
-                <!-- Resurrezione e Effetti Speciali -->
-                <details class="control-category">
-                    <summary>💀 Resurrezione e Carte Speciali</summary>
-                    <div class="category-content">
-                        <button id="revive-btn">🔄 Rianimazione</button>
-                        
-                        <div class="input-group">
-                            <label>Canto del Cigno 🦢 (seleziona giocatore)</label>
-                            <select id="canto-cigno-players" multiple size="5"></select>
-                            <button id="toggle-canto-cigno-btn" style="background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); color: #01579B;">🦢 Attiva/Disattiva Canto del Cigno</button>
-                            <div style="font-size: 0.85em; color: #0288D1; margin-top: 8px; padding: 8px; background: rgba(2,136,209,0.1); border-radius: 8px;">
-                                💡 Se perde tutti gli HP, torna con 1 HP. Si disattiva dopo l'uso
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Patto con il Diavolo 😈 (seleziona giocatore)</label>
-                            <select id="patto-diavolo-players" multiple size="5"></select>
-                            <button id="toggle-patto-diavolo-btn" style="background: linear-gradient(135deg, #B71C1C 0%, #F44336 100%);">😈 Attiva/Disattiva Patto Diavolo</button>
-                            <div style="font-size: 0.85em; color: #B71C1C; margin-top: 8px; padding: 8px; background: rgba(183,28,28,0.1); border-radius: 8px;">
-                                💡 Se perde tutti gli HP, torna con 20 HP ma usa solo 2 dadi. Si disattiva dopo l'uso
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Tomba di Tutankhamon 🏺 (seleziona giocatore)</label>
-                            <select id="tomba-tutankhamon-players" multiple size="5"></select>
-                            <button id="toggle-tomba-tutankhamon-btn" style="background: linear-gradient(135deg, #FF6F00 0%, #FF9800 100%);">🏺 Attiva/Disattiva Tomba Tutankhamon</button>
-                            <div style="font-size: 0.85em; color: #FF6F00; margin-top: 8px; padding: 8px; background: rgba(255,111,0,0.1); border-radius: 8px;">
-                                💡 Se perde tutti gli HP, torna con metà HP iniziali ma salta il turno. Si disattiva dopo l'uso
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Reincarnazione ♻️ (seleziona giocatore)</label>
-                            <select id="reincarnazione-players" multiple size="5"></select>
-                            <button id="toggle-reincarnazione-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);">♻️ Attiva/Disattiva Reincarnazione</button>
-                            <div style="font-size: 0.85em; color: #4CAF50; margin-top: 8px; padding: 8px; background: rgba(76,175,80,0.1); border-radius: 8px;">
-                                💡 Se perde tutti gli HP, torna con HP iniziali ma danni x2 permanentemente. Si disattiva dopo l'uso
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Boia Esecutore 🪓 (seleziona giocatore)</label>
-                            <select id="boia-esecutore-players" multiple size="5"></select>
-                            <button id="toggle-boia-esecutore-btn" style="background: linear-gradient(135deg, #212121 0%, #424242 100%);">🪓 Attiva/Disattiva Boia Esecutore</button>
-                            <div style="font-size: 0.85em; color: #424242; margin-top: 8px; padding: 8px; background: rgba(33,33,33,0.1); border-radius: 8px; border: 1px solid #666;">
-                                💡 Dura 2 turni: se elimina qualcuno, elimina istantaneamente anche il giocatore successivo
-                            </div>
-                        </div>
-                    </div>
-                </details>
-
-                <!-- Fine Partita -->
-                <details class="control-category">
-                    <summary>🏁 Fine Partita</summary>
-                    <div class="category-content">
-                        <button id="end-game-btn" style="background: #dc3545;">🏁 Termina Partita</button>
-                        <button id="new-game-btn" style="background: linear-gradient(135deg, #4ecca3 0%, #3ab795 100%);">🎮 Nuova Partita</button>
-                    </div>
-                </details>
+        <div class="qr-modal" id="qr-modal">
+            <div class="qr-modal-content">
+                <button class="qr-modal-close" onclick="closeQRModal()">×</button>
+                <h2>Scansiona per Rientrare</h2>
+                <div id="qrcode-modal"></div>
+                <div class="share-info">
+                    <p>Codice Partita</p>
+                    <div class="game-code" id="modal-game-code"></div>
+                </div>
             </div>
         </div>
     </div>
-
-
-    <!-- QR Code Modal -->
-    <div id="qr-modal" class="qr-modal">
-        <div class="qr-modal-content">
-            <button class="qr-modal-close" id="qr-modal-close">×</button>
-            <h2>📱 QR Code Partita</h2>
-            <div id="qrcode-modal"></div>
-            <div class="share-info">
-                <p><strong>Codice Partita:</strong></p>
-                <div class="game-code" id="modal-game-code"></div>
-                <p style="margin-top: 10px; font-size: 0.9em;">Scansiona il QR code o inserisci il codice per entrare</p>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Firebase Configuration
         const firebaseConfig = {
