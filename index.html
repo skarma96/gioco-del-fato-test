@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Gioco del Fato ✨</title>
+    <title>Gioco del Fato</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -17,7 +17,7 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
+            background: #08080f;
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 85% 20%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
@@ -438,147 +438,6 @@
             .setup-screen, .game-screen { padding: 10px; }
             .player-card { padding: 8px; margin-bottom: 6px; }
         }
-
-        /* ===== VARIANT ENHANCEMENTS ===== */
-        
-        /* Tab Navigation */
-        .master-tabs {
-            display: flex;
-            gap: 4px;
-            padding: 4px;
-            background: rgba(15, 15, 30, 0.8);
-            border-radius: 14px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            backdrop-filter: blur(12px);
-        }
-        .master-tab {
-            flex: 1;
-            padding: 10px 6px;
-            border-radius: 10px;
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            font-weight: 700;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-        .master-tab.active {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2));
-            color: #c4b5fd;
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-        }
-        .master-tab:hover:not(.active) { background: rgba(99, 102, 241, 0.08); }
-        .tab-content { display: none; animation: fadeIn 0.2s ease; }
-        .tab-content.active { display: block; }
-
-        /* Floating Action Bar */
-        .floating-bar {
-            display: none;
-            position: fixed;
-            bottom: max(12px, env(safe-area-inset-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: rgba(15, 15, 30, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 20px;
-            padding: 6px 12px;
-            gap: 8px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-        }
-        .floating-bar.visible { display: flex; }
-        .fab-btn {
-            padding: 10px 16px;
-            border-radius: 14px;
-            border: none;
-            background: rgba(99, 102, 241, 0.12);
-            color: #c4b5fd;
-            font-weight: 700;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            white-space: nowrap;
-        }
-        .fab-btn:active { transform: scale(0.95); }
-        .fab-btn.active-fab { background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.25)); }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: max(12px, env(safe-area-inset-top));
-            right: max(12px, env(safe-area-inset-right));
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-            max-width: 320px;
-        }
-        .toast {
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 600;
-            animation: toastIn 0.3s ease forwards;
-            pointer-events: auto;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }
-        .toast.removing { animation: toastOut 0.3s ease forwards; }
-        .toast-damage { background: rgba(239, 68, 68, 0.9); color: white; border-color: rgba(239,68,68,0.4); }
-        .toast-heal { background: rgba(34, 197, 94, 0.9); color: white; border-color: rgba(34,197,94,0.4); }
-        .toast-info { background: rgba(99, 102, 241, 0.9); color: white; border-color: rgba(99,102,241,0.4); }
-        .toast-elimination { background: rgba(220, 38, 38, 0.95); color: white; border-color: rgba(220,38,38,0.5); }
-        .toast-effect { background: rgba(168, 85, 247, 0.9); color: white; border-color: rgba(168,85,247,0.4); }
-
-        /* Sticky Status Bar */
-        .sticky-status {
-            display: none;
-            position: sticky;
-            top: 0;
-            z-index: 30;
-            background: rgba(10, 10, 26, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 8px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.12);
-            margin-bottom: 12px;
-            gap: 12px;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.82em;
-        }
-        .sticky-status.visible { display: flex; flex-wrap: wrap; }
-        .status-item { display: flex; align-items: center; gap: 4px; }
-        .status-label { color: #64748b; }
-        .status-value { color: #facc15; font-weight: 700; }
-
-        /* Glass card effect for player cards */
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6) !important;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(99, 102, 241, 0.1) !important;
-        }
-        
-        /* Enhanced HP bars with gradient */
-        .hp-fill-enhanced {
-            background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e) !important;
-            background-size: 200% 100% !important;
-        }
-
-        @media (max-width: 420px) {
-            .master-tab { font-size: 0.78em; padding: 8px 4px; }
-            .fab-btn { font-size: 0.78em; padding: 8px 12px; }
-            .floating-bar { padding: 4px 8px; }
-        }
     </style>
 </head>
 <body>
@@ -702,6 +561,15 @@
                     </div>
                 </div>
                 
+                <div class="qc-section">
+                    <div class="qc-section-title">Note Giocatore 📝</div>
+                    <select id="master-note-player"></select>
+                    <div class="hp-modifier">
+                        <input type="text" id="master-note-text" placeholder="Nota visibile a tutti" maxlength="100" style="font-size:14px!important;padding:12px!important;min-height:44px!important;">
+                        <button onclick="setMasterNote()" style="background:linear-gradient(135deg,#facc15,#f59e0b);">📝 Imposta Nota</button>
+                    </div>
+                </div>
+                
                 <div class="qc-grid">
                     <button id="revive-btn" style="background:linear-gradient(135deg,#22d3ee,#06b6d4);">🔄 Rianima</button>
                     <button onclick="removeAllEffects()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">🧹 Rimuovi Effetti</button>
@@ -756,7 +624,7 @@
                         </div>
                         <div class="input-group">
                             <label>Dado Avvelenato ☠️</label>
-                            <select id="dado-avvelenato-player"></select>
+                            <select id="dado-avvelenato-player" multiple size="4"></select>
                             <div style="display:flex;gap:8px;margin:8px 0;"><input type="number" id="dado-avvelenato-val1" placeholder="D1" min="1" max="6" style="flex:1;"><input type="number" id="dado-avvelenato-val2" placeholder="D2" min="1" max="6" style="flex:1;"></div>
                             <button id="set-dado-avvelenato-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);">☠️ Imposta</button>
                             <button id="remove-dado-avvelenato-btn" style="background:#ef4444;">❌ Rimuovi</button>
@@ -960,6 +828,13 @@
                             <select id="sabbie-mobili-player"></select>
                             <button id="set-sabbie-mobili-btn" style="background:linear-gradient(135deg,#eab308,#fbbf24);">⏳ Imposta</button>
                             <button id="remove-sabbie-mobili-btn" style="background:#ef4444;">❌ Rimuovi</button>
+                        </div>
+                        <div class="input-group">
+                            <label>7 Bello 🎰</label>
+                            <select id="sette-bello-player"></select>
+                            <button id="set-sette-bello-btn" style="background:linear-gradient(135deg,#facc15,#f59e0b);">🎰 Imposta</button>
+                            <button id="remove-sette-bello-btn" style="background:#ef4444;">❌ Rimuovi</button>
+                            <div style="font-size:0.8em;color:#fcd34d;margin-top:6px;padding:6px;background:rgba(250,204,21,0.08);border-radius:6px;">💡 Se fa 7 entro 2 turni, elimina il settimo giocatore (bypassa immortalità)</div>
                         </div>
                         <div class="input-group">
                             <label>Contagio 🦠</label>
@@ -1177,7 +1052,10 @@
                 toccaAMe: false,
                 toccaAMeActivator: null,
                 toccaAMeTarget: null,
-                toccaAMeRedirectFrom: null
+                toccaAMeRedirectFrom: null,
+                setteBello: false,
+                setteBelloActivator: null,
+                setteBelloTurnsLeft: 0
             }
         };
 
@@ -1253,6 +1131,8 @@
         document.getElementById('remove-armatura-specchio-btn')?.addEventListener('click', removeArmaturaSpecchio);
         document.getElementById('set-sabbie-mobili-btn')?.addEventListener('click', setSabbieMobili);
         document.getElementById('remove-sabbie-mobili-btn')?.addEventListener('click', removeSabbieMobili);
+        document.getElementById('set-sette-bello-btn')?.addEventListener('click', set7Bello);
+        document.getElementById('remove-sette-bello-btn')?.addEventListener('click', remove7Bello);
         document.getElementById('toggle-canto-cigno-btn')?.addEventListener('click', toggleCantoCigno);
         document.getElementById('toggle-patto-diavolo-btn')?.addEventListener('click', togglePattoDiavolo);
         document.getElementById('toggle-tomba-tutankhamon-btn')?.addEventListener('click', toggleTombaTutankhamon);
@@ -1458,6 +1338,7 @@
                         boiaEsecutore: false,
                         boiaEsecutoreTurns: 0,
                         extraTurns: 0,
+                        masterNote: '', // Note del master visibili a tutti
                         temporaryEffects: {
                             immortal: false,
                             multiplier: false,
@@ -1728,6 +1609,7 @@
                     <div class="hp-bar-container">
                         <div class="hp-bar" style="width: ${hpPercent}%; background: ${hpBarColor};"></div>
                     </div>
+                    ${player.masterNote ? '<div style="background:rgba(250,204,21,0.08);padding:6px 8px;border-radius:6px;margin-top:6px;font-size:0.85em;color:#facc15;border-left:2px solid #facc15;">📝 ' + player.masterNote + '</div>' : ''}
                     ${player.isEliminated ? '<div class="eliminated-tag">☠️ ELIMINATO</div>' : ''}
                 `;
                 
@@ -2057,7 +1939,8 @@
                 { id: 'volo-fenice-players', prop: 'voloFenice', emoji: '🦅' },
                 { id: 'cactus-amari-players', prop: 'cactusAmari', emoji: '🌵' },
                 { id: 'catena-maledetta-players', prop: 'catenaMaledetta', emoji: '⛓️' },
-                { id: 'rifletti-danni-players', prop: 'rifletteDanni', emoji: '🛡️' }
+                { id: 'rifletti-danni-players', prop: 'rifletteDanni', emoji: '🛡️' },
+                { id: 'dado-avvelenato-player', prop: 'dadoAvvelenato', emoji: '☠️' }
             ];
             
             nuoviSelectMultipli.forEach(({ id, prop, emoji }) => {
@@ -2099,11 +1982,23 @@
                 }
             });
         }
+        
+        // Update master-note-player select
+        const masterNoteSelect = document.getElementById('master-note-player');
+        if (masterNoteSelect) {
+            masterNoteSelect.innerHTML = '';
+            gameState.players.forEach((player, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = player.name + (player.masterNote ? ' 📝' : '');
+                masterNoteSelect.appendChild(option);
+            });
+        }
 
             // Update select singoli
-            const selectSingoli = ['talismano-ra-player', 'dado-avvelenato-player', 'interferenza-player1', 
+            const selectSingoli = ['talismano-ra-player', 'interferenza-player1', 
                                    'interferenza-player2', 'alta-marea-player', 'zebratura-player', 
-                                   'boomerang-player', 'armatura-specchio-player', 'sabbie-mobili-player'];
+                                   'boomerang-player', 'armatura-specchio-player', 'sabbie-mobili-player', 'sette-bello-player'];
             
             selectSingoli.forEach(selectId => {
                 const select = document.getElementById(selectId);
@@ -2405,9 +2300,15 @@
                 // Nota: la variabile target verrà riassegnata nella sezione "Apply damage"
             }
             
-            // CAPSULA RIGENERATIVA - tutti curano
-            if (gfx.capsulaRigenerativa && result.damage > 0) {
-                result.damage = -Math.abs(result.damage); // Converti in cura
+            // CAPSULA RIGENERATIVA - tutti curano se stessi invece di danneggiare
+            if (gfx.capsulaRigenerativa && target && result.damage > 0) {
+                const originalTarget = target.name;
+                result.targetIndex = result.shooterIndex; // Cambia target a sé stesso
+                // Converti danno in cura
+                result.damage = -Math.abs(result.damage);
+                const newTarget = gameState.players[result.targetIndex];
+                gameState.history.push(`💊 [Capsula Rigenerativa] ${shooter.name} si cura invece di colpire ${originalTarget}!`);
+                // La variabile target verrà riassegnata nella sezione "Apply damage"
             }
             
             // SALDI ESTIVI - danni E cure dimezzati
@@ -2686,6 +2587,8 @@
                         });
                         gameState.history.push(`🪞 [Armatura Specchio] ${damagePerPlayer} danni distribuiti a tutti: ${affectedNames.join(', ')}`);
                         playSound('damage');
+                        // Passa automaticamente al turno successivo
+                        shooter.skipTurn = true;
                         database.ref('games/' + gameState.gameCode).update({
                             players: gameState.players,
                             history: gameState.history
@@ -2710,25 +2613,22 @@
                         return; // Target non subisce danno
                     }
                     
-                    // MARE DI GUAI - applica moltiplicatore x2 all'attaccante e salta turno
+                    // MARE DI GUAI - chi ha il malus subisce il doppio dei danni ricevuti e salta turno
                     if (finalTarget.mareGuai && actualDamage > 0) {
-                        // Applica moltiplicatore x2 solo se l'attaccante non ne ha già uno
-                        if (shooter.multiplier === 1) {
-                            shooter.multiplier = 2;
-                            shooter.multiplierAppliedBy = result.shooterIndex; // Si auto-applica
-                            shooter.temporaryEffects.multiplier = true; // Dura 1 turno dell'attaccante
-                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} ottiene moltiplicatore danni x2 per il prossimo turno`);
-                        } else {
-                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} ha già un moltiplicatore attivo (x${shooter.multiplier}) - Mare di Guai non ha effetto`);
-                        }
+                        // Raddoppia i danni ricevuti
+                        actualDamage = actualDamage * 2;
+                        gameState.history.push(`🌊 [Mare di Guai] ${finalTarget.name} subisce danni raddoppiati (${actualDamage})`);
+                    }
+                    
+                    // Se l'attaccante ha Mare di Guai e fa tris, salta il turno
+                    if (shooter.mareGuai && result.specialEffect === 'Tris') {
                         // Far saltare il turno (solo se non sta già saltando)
                         if (!shooter.skipTurn) {
                             shooter.skipTurn = true;
-                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} salterà il prossimo turno`);
+                            gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} ha fatto tris - salterà il prossimo turno`);
                         } else {
                             gameState.history.push(`🌊 [Mare di Guai] ${shooter.name} sta già saltando il prossimo turno`);
                         }
-                        // Il target subisce comunque i danni normalmente (continua con il flusso)
                     }
                     
                     // CACTUS AMARI - subisce e riflette il doppio
@@ -2776,15 +2676,14 @@
                         }
                     }
                     
-                    // SABBIE MOBILI - chi viene colpito salta il turno
+                    // SABBIE MOBILI - chi viene colpito (incluso attivatore) salta il turno
                     if (gfx.sabbieMobili && result.shooterIndex !== gfx.sabbieMobiliActivator && actualDamage > 0) {
-                        if (result.targetIndex !== gfx.sabbieMobiliActivator) {
-                            if (!finalTarget.skipTurn) {
-                                finalTarget.skipTurn = true;
-                                gameState.history.push(`⏳ [Sabbie Mobili] ${finalTarget.name} salterà il prossimo turno`);
-                            } else {
-                                gameState.history.push(`⏳ [Sabbie Mobili] ${finalTarget.name} sta già saltando il prossimo turno`);
-                            }
+                        // Chi attacca viene bloccato se colpisce chiunque (incluso l'attivatore)
+                        if (!shooter.skipTurn) {
+                            shooter.skipTurn = true;
+                            gameState.history.push(`⏳ [Sabbie Mobili] ${shooter.name} salterà il prossimo turno`);
+                        } else {
+                            gameState.history.push(`⏳ [Sabbie Mobili] ${shooter.name} sta già saltando il prossimo turno`);
                         }
                     }
                     
@@ -3126,6 +3025,35 @@
             }
             
             gameState.history.push(historyText);
+
+            // 7 BELLO - Controlla se l'attivatore ha fatto 7 nei prossimi 2 turni
+            if (gfx.setteBello && result.shooterIndex === gfx.setteBelloActivator && result.sum === 7) {
+                // Trova il settimo giocatore attivo (escludendo attivatore ed eliminati)
+                const activePlayers = gameState.players
+                    .map((p, i) => ({ player: p, index: i }))
+                    .filter(({ player, index }) => !player.isEliminated && index !== gfx.setteBelloActivator);
+                
+                if (activePlayers.length >= 7) {
+                    const seventhPlayer = activePlayers[6]; // Indice 6 = settimo giocatore
+                    seventhPlayer.player.hp = 0;
+                    seventhPlayer.player.isEliminated = true;
+                    seventhPlayer.player.isImmortal = false; // Bypassa immortalità
+                    
+                    gameState.history.push(`🎰 [7 BELLO] ${shooter.name} ha fatto 7! ${seventhPlayer.player.name} (settimo giocatore) ELIMINATO direttamente!`);
+                    playSound('elimination');
+                    
+                    if (seventhPlayer.player.name === gameState.playerName && !gameState.isMaster) {
+                        setTimeout(() => showEliminatedNotification(), 500);
+                    }
+                } else {
+                    gameState.history.push(`🎰 [7 Bello] ${shooter.name} ha fatto 7, ma non ci sono abbastanza giocatori attivi (serve almeno 7)`);
+                }
+                
+                // Disattiva effetto dopo l'uso
+                gfx.setteBello = false;
+                gfx.setteBelloActivator = null;
+                gfx.setteBelloTurnsLeft = 0;
+            }
 
             // Reset temporary effects for the player who just played
             resetTemporaryEffects(result.shooterIndex);
@@ -4331,6 +4259,8 @@
                 gfx.boomerangActivator = null;
                 gfx.boomerangDamage = 0;
                 globalReset.push('boomerang');
+                // Passa automaticamente al turno successivo
+                player.skipTurn = true;
             }
             if (gfx.armaturaSpecchioActivator === playerIndex && gfx.armaturaSpecchio) {
                 gfx.armaturaSpecchio = false;
@@ -4356,6 +4286,18 @@
                 gfx.nirvana = false;
                 gfx.nirvanaActivator = null;
                 globalReset.push('nirvana');
+            }
+            
+            // Decrementa turni 7 Bello
+            if (gfx.setteBello && gfx.setteBelloActivator === playerIndex) {
+                gfx.setteBelloTurnsLeft--;
+                if (gfx.setteBelloTurnsLeft <= 0) {
+                    gfx.setteBello = false;
+                    gfx.setteBelloActivator = null;
+                    gfx.setteBelloTurnsLeft = 0;
+                    gameState.history.push(`🎰 [7 Bello] Effetto scaduto per ${player.name} - non ha fatto 7 in tempo`);
+                    globalReset.push('7 bello');
+                }
             }
             
             if (globalReset.length > 0) {
@@ -4881,16 +4823,46 @@
             
             if (gameState.globalEffects.giocoPulito) {
                 gameState.globalEffects.giocoPulitoActivator = activatorIndex;
-                gameState.history.push(`⚖️ Gioco Pulito attivato per 1 turno completo! Coppie/tris annullati, effetti disattivati. Attivatore: ${gameState.players[currentPlayerIndex].name}`);
+                gameState.history.push(`⚖️ Gioco Pulito attivato per 1 turno completo! Coppie/tris annullati, TUTTI gli effetti disattivati. Attivatore: ${gameState.players[activatorIndex].name}`);
                 
-                // Disattiva tutti gli altri effetti (tranne Gioco Pulito stesso)
+                // Disattiva TUTTI gli altri effetti globali (tranne Gioco Pulito stesso)
                 gameState.globalEffects.cessateFuoco = false;
+                gameState.globalEffects.cessateFuocoActivator = null;
                 gameState.globalEffects.pariPazzo = false;
+                gameState.globalEffects.pariPazzoActivator = null;
                 gameState.globalEffects.bambolaVoodoo = false;
+                gameState.globalEffects.bambolaVoodooActivator = null;
                 gameState.globalEffects.cannoneKarma = false;
+                gameState.globalEffects.cannoneKarmaActivator = null;
                 gameState.globalEffects.pioggiaAcida = false;
+                gameState.globalEffects.pioggiaAcidaActivator = null;
                 gameState.globalEffects.capsulaRigenerativa = false;
+                gameState.globalEffects.capsulaRigenerativaActivator = null;
                 gameState.globalEffects.saldiEstivi = false;
+                gameState.globalEffects.saldiEstiviActivator = null;
+                gameState.globalEffects.altaMarea = false;
+                gameState.globalEffects.altaMareaActivator = null;
+                gameState.globalEffects.zebratura = false;
+                gameState.globalEffects.zebraturaActivator = null;
+                gameState.globalEffects.boomerang = false;
+                gameState.globalEffects.boomerangActivator = null;
+                gameState.globalEffects.boomerangDamage = 0;
+                gameState.globalEffects.armaturaSpecchio = false;
+                gameState.globalEffects.armaturaSpecchioActivator = null;
+                gameState.globalEffects.sabbieMobili = false;
+                gameState.globalEffects.sabbieMobiliActivator = null;
+                gameState.globalEffects.domino = false;
+                gameState.globalEffects.dominoActivator = null;
+                gameState.globalEffects.contagio = false;
+                gameState.globalEffects.contagioActivator = null;
+                gameState.globalEffects.treMolio = false;
+                gameState.globalEffects.treMolioActivator = null;
+                gameState.globalEffects.nirvana = false;
+                gameState.globalEffects.nirvanaActivator = null;
+                gameState.globalEffects.toccaAMe = false;
+                gameState.globalEffects.toccaAMeActivator = null;
+                gameState.globalEffects.toccaAMeTarget = null;
+                gameState.globalEffects.toccaAMeRedirectFrom = null;
             } else {
                 gameState.globalEffects.giocoPulitoActivator = null;
                 gameState.history.push(`⚖️ Gioco Pulito disattivato`);
@@ -5225,12 +5197,13 @@
         function setDadoAvvelenato() {
             if (!gameState.isMaster) return;
             
-            const playerIndex = parseInt(document.getElementById('dado-avvelenato-player').value);
+            const select = document.getElementById('dado-avvelenato-player');
+            const selectedIndices = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
             const val1 = parseInt(document.getElementById('dado-avvelenato-val1').value);
             const val2 = parseInt(document.getElementById('dado-avvelenato-val2').value);
             
-            if (isNaN(playerIndex)) {
-                alert('Seleziona un giocatore!');
+            if (selectedIndices.length === 0) {
+                alert('Seleziona almeno un giocatore!');
                 return;
             }
             
@@ -5239,14 +5212,17 @@
                 return;
             }
             
-            const player = gameState.players[playerIndex];
-            player.dadoAvvelenato = true;
-            player.dadoAvvelenatotValues = [val1, val2];
+            selectedIndices.forEach(playerIndex => {
+                const player = gameState.players[playerIndex];
+                player.dadoAvvelenato = true;
+                player.dadoAvvelenatotValues = [val1, val2];
+                
+                if (!player.temporaryEffects) player.temporaryEffects = {};
+                player.temporaryEffects.dadoAvvelenato = true;
+            });
             
-            if (!player.temporaryEffects) player.temporaryEffects = {};
-            player.temporaryEffects.dadoAvvelenato = true;
-            
-            gameState.history.push(`☠️ Dado Avvelenato attivato per ${player.name}! Valori: ${val1}, ${val2} (temp - 1 turno)`);
+            const playerNames = selectedIndices.map(i => gameState.players[i].name).join(', ');
+            gameState.history.push(`☠️ Dado Avvelenato attivato per: ${playerNames}! Valori: ${val1}, ${val2} (temp - 1 turno)`);
             
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
@@ -5257,20 +5233,24 @@
         function removeDadoAvvelenato() {
             if (!gameState.isMaster) return;
             
-            const playerIndex = parseInt(document.getElementById('dado-avvelenato-player').value);
+            const select = document.getElementById('dado-avvelenato-player');
+            const selectedIndices = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
             
-            if (isNaN(playerIndex)) {
-                alert('Seleziona un giocatore!');
+            if (selectedIndices.length === 0) {
+                alert('Seleziona almeno un giocatore!');
                 return;
             }
             
-            const player = gameState.players[playerIndex];
-            player.dadoAvvelenato = false;
-            player.dadoAvvelenatotValues = [];
+            selectedIndices.forEach(playerIndex => {
+                const player = gameState.players[playerIndex];
+                player.dadoAvvelenato = false;
+                player.dadoAvvelenatotValues = [];
+                
+                if (player.temporaryEffects) player.temporaryEffects.dadoAvvelenato = false;
+            });
             
-            if (player.temporaryEffects) player.temporaryEffects.dadoAvvelenato = false;
-            
-            gameState.history.push(`❌ Dado Avvelenato rimosso da ${player.name}`);
+            const playerNames = selectedIndices.map(i => gameState.players[i].name).join(', ');
+            gameState.history.push(`❌ Dado Avvelenato rimosso da: ${playerNames}`);
             
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
@@ -5563,6 +5543,26 @@
             gameState.globalEffects.sabbieMobili = false;
             gameState.globalEffects.sabbieMobiliActivator = null;
             gameState.history.push(`❌ Sabbie Mobili rimosse`);
+            database.ref('games/' + gameState.gameCode).update({ globalEffects: gameState.globalEffects, history: gameState.history });
+        }
+
+        function set7Bello() {
+            if (!gameState.isMaster) return;
+            const playerIndex = parseInt(document.getElementById('sette-bello-player').value);
+            if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            gameState.globalEffects.setteBello = true;
+            gameState.globalEffects.setteBelloActivator = playerIndex;
+            gameState.globalEffects.setteBelloTurnsLeft = 2; // 2 turni per fare 7
+            gameState.history.push(`🎰 7 Bello attivato! ${gameState.players[playerIndex].name} ha 2 turni per fare 7 ed eliminare il settimo giocatore`);
+            database.ref('games/' + gameState.gameCode).update({ globalEffects: gameState.globalEffects, history: gameState.history });
+        }
+
+        function remove7Bello() {
+            if (!gameState.isMaster) return;
+            gameState.globalEffects.setteBello = false;
+            gameState.globalEffects.setteBelloActivator = null;
+            gameState.globalEffects.setteBelloTurnsLeft = 0;
+            gameState.history.push(`❌ 7 Bello rimosso`);
             database.ref('games/' + gameState.gameCode).update({ globalEffects: gameState.globalEffects, history: gameState.history });
         }
 
@@ -5991,146 +5991,36 @@
             database.ref('games/' + gameState.gameCode).update({ players: gameState.players, history: gameState.history });
         }
 
-
-        // ===== VARIANT: Toast Notification System =====
-        function showToast(message, type = 'info', duration = 3000) {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            toast.className = 'toast toast-' + type;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('removing');
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // ===== VARIANT: Tab System =====
-        function switchMasterTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            document.querySelectorAll('.master-tab').forEach(mt => mt.classList.remove('active'));
-            document.querySelectorAll('.fab-btn').forEach(fb => fb.classList.remove('active-fab'));
+        function setMasterNote() {
+            if (!gameState.isMaster) return;
+            const select = document.getElementById('master-note-player');
+            const playerIndex = parseInt(select.value);
+            const noteInput = document.getElementById('master-note-text');
+            const note = noteInput.value.trim();
             
-            const tabEl = document.getElementById('tab-' + tabName);
-            if (tabEl) tabEl.classList.add('active');
-            
-            const btnEl = document.querySelector('[data-tab="' + tabName + '"]');
-            if (btnEl) btnEl.classList.add('active');
-            
-            const fabEl = document.querySelector('.fab-btn[data-tab="' + tabName + '"]');
-            if (fabEl) fabEl.classList.add('active-fab');
-        }
-
-        // ===== VARIANT: Enhance showGameScreen =====
-        const originalShowGameScreen = showGameScreen;
-        showGameScreen = function() {
-            originalShowGameScreen();
-            
-            // Show floating bar and sticky status for master
-            if (gameState.isMaster) {
-                const floatingBar = document.getElementById('floating-bar');
-                const stickyStatus = document.getElementById('sticky-status');
-                if (floatingBar) floatingBar.classList.add('visible');
-                if (stickyStatus) stickyStatus.classList.add('visible');
-                
-                // Wrap master controls content in tabs
-                const masterControls = document.getElementById('master-controls');
-                if (masterControls && !document.getElementById('master-tabs-nav')) {
-                    // Create tab navigation
-                    const tabNav = document.createElement('div');
-                    tabNav.className = 'master-tabs';
-                    tabNav.id = 'master-tabs-nav';
-                    tabNav.innerHTML = `
-                        <button class="master-tab active" data-tab="gioco" onclick="switchMasterTab('gioco')">🎮 Gioco</button>
-                        <button class="master-tab" data-tab="comandi" onclick="switchMasterTab('comandi')">⚡ Comandi</button>
-                        <button class="master-tab" data-tab="meccaniche" onclick="switchMasterTab('meccaniche')">🔮 Meccaniche</button>
-                    `;
-                    
-                    // Move game elements into tab-gioco
-                    const gameScreen = document.getElementById('game-screen');
-                    const timer = document.getElementById('timer');
-                    const direction = document.getElementById('direction');
-                    const currentTurnEl = document.getElementById('current-turn');
-                    const diceCalc = document.querySelector('.dice-calculator');
-                    const activeEffects = document.querySelector('.active-effects-panel');
-                    const playersList = document.getElementById('players-list');
-                    const leaderboard = document.querySelector('.leaderboard');
-                    const history = document.getElementById('history');
-                    
-                    // Insert tab nav at start of game screen
-                    gameScreen.insertBefore(tabNav, gameScreen.firstChild);
-                    
-                    // Create tab containers
-                    const tabGioco = document.createElement('div');
-                    tabGioco.className = 'tab-content active';
-                    tabGioco.id = 'tab-gioco';
-                    
-                    const tabComandi = document.createElement('div');
-                    tabComandi.className = 'tab-content';
-                    tabComandi.id = 'tab-comandi';
-                    
-                    const tabMeccaniche = document.createElement('div');
-                    tabMeccaniche.className = 'tab-content';
-                    tabMeccaniche.id = 'tab-meccaniche';
-                    
-                    // Move elements to tab-gioco
-                    [timer, direction, currentTurnEl, diceCalc, activeEffects, playersList, leaderboard, history].forEach(el => {
-                        if (el) tabGioco.appendChild(el);
-                    });
-                    
-                    // Move quick commands to tab-comandi
-                    const quickCommands = document.getElementById('quick-commands');
-                    if (quickCommands) tabComandi.appendChild(quickCommands);
-                    
-                    // Move master controls mechanics to tab-meccaniche
-                    if (masterControls) tabMeccaniche.appendChild(masterControls);
-                    
-                    // Add tabs to game screen
-                    gameScreen.appendChild(tabGioco);
-                    gameScreen.appendChild(tabComandi);
-                    gameScreen.appendChild(tabMeccaniche);
-                }
+            if (isNaN(playerIndex)) {
+                alert('Seleziona un giocatore!');
+                return;
             }
-        };
-
-        // Update sticky status on Firebase changes
-        const originalListenToGameChanges = listenToGameChanges;
-        listenToGameChanges = function(code) {
-            originalListenToGameChanges(code);
             
-            // Add additional listener for sticky status
-            database.ref('games/' + code).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-                
-                const statusBar = document.getElementById('sticky-status');
-                if (statusBar && gameState.isMaster) {
-                    const currentPlayer = data.players[data.currentTurn];
-                    const timerEl = document.getElementById('timer');
-                    document.getElementById('status-turn').textContent = currentPlayer ? currentPlayer.name : '?';
-                    document.getElementById('status-direction').textContent = data.direction === 'clockwise' ? '⭮' : '⭯';
-                    document.getElementById('status-alive').textContent = data.players.filter(p => !p.isEliminated).length + '/' + data.players.length;
-                }
+            const player = gameState.players[playerIndex];
+            player.masterNote = note;
+            
+            if (note) {
+                gameState.history.push(`📝 Nota aggiunta a ${player.name}: "${note}"`);
+            } else {
+                gameState.history.push(`❌ Nota rimossa da ${player.name}`);
+            }
+            
+            database.ref('games/' + gameState.gameCode).update({
+                players: gameState.players,
+                history: gameState.history
             });
-        };
+            
+            // Pulisci il campo input
+            noteInput.value = '';
+        }
+
     </script>
-
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
-    
-    <!-- Sticky Status Bar -->
-    <div id="sticky-status" class="sticky-status">
-        <div class="status-item"><span class="status-label">Turno:</span> <span class="status-value" id="status-turn">-</span></div>
-        <div class="status-item"><span class="status-label">Dir:</span> <span class="status-value" id="status-direction">⭮</span></div>
-        <div class="status-item"><span class="status-label">Vivi:</span> <span class="status-value" id="status-alive">-</span></div>
-    </div>
-
-    <!-- Floating Action Bar -->
-    <div id="floating-bar" class="floating-bar">
-        <button class="fab-btn active-fab" data-tab="gioco" onclick="switchMasterTab('gioco')">🎮 Gioco</button>
-        <button class="fab-btn" data-tab="comandi" onclick="switchMasterTab('comandi')">⚡ Comandi</button>
-        <button class="fab-btn" data-tab="meccaniche" onclick="switchMasterTab('meccaniche')">🔮 Meccaniche</button>
-    </div>
 </body>
 </html>
