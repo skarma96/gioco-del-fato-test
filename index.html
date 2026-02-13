@@ -1061,6 +1061,24 @@
 
         let timerInterval = null;
 
+        // ===== OTTIMIZZAZIONI: Gestione Listener Firebase =====
+        let currentGameListener = null; // Traccia il listener principale
+        let playerListListener = null; // Traccia il listener lista giocatori
+
+        // ===== OTTIMIZZAZIONE: Aggiornamento UI Ottimistico =====
+        // Questa funzione aggiorna IMMEDIATAMENTE l'UI locale senza aspettare Firebase
+        // Dà un feedback istantaneo all'utente mentre Firebase sincronizza in background
+        function forceUIUpdate() {
+            renderPlayers();
+            renderLeaderboard();
+            renderHistory();
+            updateTurnDisplay();
+            updateDirectionDisplay();
+            renderDiceInputs();
+            updateMasterControls();
+            renderActiveEffects();
+        }
+
         // Setup Event Listeners
         document.getElementById('num-players').addEventListener('change', generatePlayerNameInputs);
 
@@ -1152,6 +1170,19 @@
             }
         });
 
+        // ===== FIX: Cleanup listener quando si chiude/ricarica la pagina =====
+        window.addEventListener('beforeunload', function() {
+            if (currentGameListener && gameState.gameCode) {
+                database.ref('games/' + gameState.gameCode).off('value', currentGameListener);
+            }
+            if (playerListListener && gameState.gameCode) {
+                database.ref('games/' + gameState.gameCode).off('value', playerListListener);
+            }
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        });
+
         // Auto-detect role from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
         const gameCode = urlParams.get('game');
@@ -1176,7 +1207,13 @@
         }
 
         function loadAvailablePlayers(code) {
-            database.ref('games/' + code).on('value', (snapshot) => {
+            // ===== FIX: Rimuovi listener precedente =====
+            if (playerListListener) {
+                database.ref('games/' + code).off('value', playerListListener);
+                playerListListener = null;
+            }
+            
+            playerListListener = function(snapshot) {
                 if (!snapshot.exists()) {
                     return;
                 }
@@ -1205,7 +1242,10 @@
                         </div>`)
                         .join('');
                 }
-            });
+            };
+            
+            // Attiva il listener
+            database.ref('games/' + code).on('value', playerListListener);
         }
 
         function generatePlayerNameInputs() {
@@ -1507,7 +1547,14 @@
         }
 
         function listenToGameChanges(code) {
-            database.ref('games/' + code).on('value', (snapshot) => {
+            // ===== FIX: Rimuovi listener precedente per evitare duplicati =====
+            if (currentGameListener) {
+                database.ref('games/' + gameState.gameCode).off('value', currentGameListener);
+                currentGameListener = null;
+            }
+            
+            // Definisci il listener come funzione nominata per poterlo rimuovere
+            currentGameListener = function(snapshot) {
                 if (!snapshot.exists()) return;
 
                 const data = snapshot.val();
@@ -1546,7 +1593,10 @@
                 if (gameState.startTime && !timerInterval) {
                     startTimer();
                 }
-            });
+            };
+            
+            // Attiva il listener
+            database.ref('games/' + code).on('value', currentGameListener);
         }
 
         function renderPlayers() {
@@ -3061,7 +3111,17 @@
             // Next turn
             const nextTurn = getNextActiveTurn();
 
-            // Update Firebase
+            // ===== FIX: Limita history agli ultimi 50 eventi prima dell'update =====
+            if (gameState.history.length > 50) {
+                gameState.history = gameState.history.slice(-50);
+            }
+
+            // ===== FASE 1: OPTIMISTIC UPDATE per Tiro Dadi =====
+            // Aggiorna stato locale PRIMA di Firebase per feedback immediato
+            gameState.currentTurn = nextTurn;
+            forceUIUpdate(); // Il giocatore vede SUBITO il risultato! ⚡
+
+            // Update Firebase in background
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
                 currentTurn: nextTurn,
@@ -3520,11 +3580,16 @@
         function reverseDirection() {
             if (!gameState.isMaster) return;
             
-            const newDirection = gameState.direction === 'clockwise' ? 'counterclockwise' : 'clockwise';
-            database.ref('games/' + gameState.gameCode).update({ direction: newDirection });
-            
+            gameState.direction = gameState.direction === 'clockwise' ? 'counterclockwise' : 'clockwise';
             gameState.history.push('⭮ Direzione invertita');
-            database.ref('games/' + gameState.gameCode + '/history').set(gameState.history);
+            
+            // ===== OTTIMIZZAZIONE: Aggiorna UI prima, poi singolo update =====
+            forceUIUpdate(); // Feedback immediato!
+            
+            database.ref('games/' + gameState.gameCode).update({ 
+                direction: gameState.direction,
+                history: gameState.history
+            });
         }
         
         function rollbackLastTurn() {
@@ -3545,6 +3610,9 @@
             
             gameState.history.push('↩️ Ultima giocata annullata dal Master');
             
+            // ===== OTTIMIZZAZIONE: Aggiorna UI prima di Firebase =====
+            forceUIUpdate(); // Feedback immediato!
+            
             // Update Firebase
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
@@ -3561,11 +3629,18 @@
             if (!gameState.isMaster) return;
             
             const nextTurnIndex = parseInt(document.getElementById('next-turn-player').value);
-            database.ref('games/' + gameState.gameCode).update({ currentTurn: nextTurnIndex });
+            gameState.currentTurn = nextTurnIndex;
             
             const playerName = gameState.players[nextTurnIndex].name;
             gameState.history.push(`⏭️ Turno cambiato a ${playerName}`);
-            database.ref('games/' + gameState.gameCode + '/history').set(gameState.history);
+            
+            // ===== OTTIMIZZAZIONE: Aggiorna UI prima, poi singolo update =====
+            forceUIUpdate(); // Feedback immediato!
+            
+            database.ref('games/' + gameState.gameCode).update({ 
+                currentTurn: nextTurnIndex,
+                history: gameState.history 
+            });
         }
 
         function modifyHP(type) {
@@ -3588,21 +3663,45 @@
             const playerIndices = Array.from(selectedOptions).map(opt => parseInt(opt.value));
             
             if (type === 'damage') {
-                // USA applyResult PER ATTIVARE TUTTI GLI EFFETTI
+                // ===== OTTIMIZZAZIONE: Danni manuali veloci senza applyResult =====
+                // Il Master applica danni diretti, bypassando le meccaniche complesse
+                // Questo è MOLTO più veloce e dà feedback immediato
+                
                 playerIndices.forEach(targetIndex => {
-                    const result = {
-                        shooterIndex: activatorIndex,
-                        targetIndex: targetIndex,
-                        damage: amount,
-                        sum: amount, // Per consistenza
-                        diceValues: [], // Nessun dado
-                        specialEffect: 'Danno Manuale Master',
-                        selfHeal: 0,
-                        isPoker: false
-                    };
+                    const target = gameState.players[targetIndex];
+                    const activator = gameState.players[activatorIndex];
                     
-                    gameState.history.push(`🎯 [Master] ${gameState.players[activatorIndex].name} infligge ${amount} danni manuali a ${gameState.players[targetIndex].name}`);
-                    applyResult(result);
+                    // Applica danno diretto
+                    target.hp = Math.max(0, target.hp - amount);
+                    
+                    // Controlla eliminazione
+                    if (target.hp === 0 && !target.isEliminated) {
+                        target.isEliminated = true;
+                        gameState.history.push(`💀 ${target.name} è stato eliminato dal danno manuale!`);
+                        playSound('elimination');
+                    } else {
+                        playSound('hit');
+                    }
+                    
+                    // Animazione
+                    animateHP(targetIndex, -amount);
+                    
+                    // History
+                    gameState.history.push(`🎯 [Master] ${activator.name} infligge ${amount} danni manuali a ${target.name}`);
+                });
+                
+                // Limita history
+                if (gameState.history.length > 50) {
+                    gameState.history = gameState.history.slice(-50);
+                }
+                
+                // ===== AGGIORNAMENTO OTTIMISTICO: UI prima, Firebase dopo =====
+                forceUIUpdate(); // Feedback IMMEDIATO!
+                
+                // Update Firebase in background (singolo update per tutti i target)
+                database.ref('games/' + gameState.gameCode).update({
+                    players: gameState.players,
+                    history: gameState.history
                 });
             } else {
                 // CURE - funzionamento normale (non attiva effetti)
@@ -3614,6 +3713,10 @@
                     playSound('heal');
                 });
                 
+                // ===== OTTIMIZZAZIONE: Aggiorna UI PRIMA di Firebase =====
+                forceUIUpdate(); // Feedback immediato!
+                
+                // Poi invia a Firebase in background
                 database.ref('games/' + gameState.gameCode).update({
                     players: gameState.players,
                     history: gameState.history
@@ -3653,6 +3756,9 @@
             playSound('revive');
             screenFlash('revive');
             createParticles(window.innerWidth / 2, window.innerHeight / 2, 'revive');
+            
+            // ===== OTTIMIZZAZIONE: Aggiorna UI prima di Firebase =====
+            forceUIUpdate(); // Feedback immediato!
             
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
@@ -3698,14 +3804,17 @@
             
             gameState.history.push(`🔄 ${player1.name} e ${player2.name} hanno scambiato HP (${player2.hp} ↔ ${player1.hp})`);
             
+            // Animate both players
+            animateHP(player1Index, 0);
+            animateHP(player2Index, 0);
+            
+            // ===== OTTIMIZZAZIONE: Aggiorna UI prima di Firebase =====
+            forceUIUpdate(); // Feedback immediato!
+            
             database.ref('games/' + gameState.gameCode).update({
                 players: gameState.players,
                 history: gameState.history
             });
-            
-            // Animate both players
-            animateHP(player1Index, 0);
-            animateHP(player2Index, 0);
         }
 
         function newGame() {
@@ -4641,6 +4750,8 @@
                 gameState.history.push(`🕊️ Cessate il Fuoco disattivato`);
             }
             
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -4666,6 +4777,8 @@
                 gameState.globalEffects.pariPazzoActivator = null;
                 gameState.history.push(`🎲 Di Pari Pazzo disattivato`);
             }
+            
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
             
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
@@ -4693,6 +4806,8 @@
                 gameState.history.push(`🪆 Bambola Voodoo disattivata`);
             }
             
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -4719,6 +4834,8 @@
                 gameState.history.push(`💥 Cannone del Karma disattivato`);
             }
             
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -4744,6 +4861,8 @@
                 gameState.globalEffects.pioggiaAcidaActivator = null;
                 gameState.history.push(`☔ Pioggia Acida disattivata`);
             }
+            
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
             
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
@@ -4777,6 +4896,8 @@
                 gameState.history.push(`💊 Capsula Rigenerativa disattivata`);
             }
             
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -4802,6 +4923,8 @@
                 gameState.globalEffects.saldiEstiviActivator = null;
                 gameState.history.push(`🏖️ Saldi Estivi disattivati`);
             }
+            
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
             
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
@@ -4867,6 +4990,8 @@
                 gameState.globalEffects.giocoPulitoActivator = null;
                 gameState.history.push(`⚖️ Gioco Pulito disattivato`);
             }
+            
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
             
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
@@ -5658,6 +5783,8 @@
                 gameState.globalEffects.dominoActivator = null;
                 gameState.history.push('🁡 Domino disattivato.');
             }
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -5678,6 +5805,8 @@
                 gameState.globalEffects.contagioActivator = null;
                 gameState.history.push('🦠 Contagio disattivato.');
             }
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -5698,6 +5827,8 @@
                 gameState.globalEffects.treMolioActivator = null;
                 gameState.history.push('🎯 3 Molio disattivato.');
             }
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -5718,6 +5849,8 @@
                 gameState.globalEffects.nirvanaActivator = null;
                 gameState.history.push('🧘 Nirvana disattivato.');
             }
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -5736,6 +5869,8 @@
             gameState.globalEffects.toccaAMeActivator = activatorIndex;
             gameState.globalEffects.toccaAMeTarget = targetIndex;
             gameState.history.push(`✋ Tocca a Me: ${gameState.players[activatorIndex].name} giocherà al posto di ${gameState.players[targetIndex].name}!`);
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
@@ -5749,6 +5884,8 @@
             gameState.globalEffects.toccaAMeTarget = null;
             gameState.globalEffects.toccaAMeRedirectFrom = null;
             gameState.history.push('✋ Tocca a Me disattivato.');
+            forceUIUpdate(); // FASE 2: Feedback immediato toggle ⚡
+            
             database.ref('games/' + gameState.gameCode).update({
                 globalEffects: gameState.globalEffects,
                 history: gameState.history
