@@ -499,6 +499,9 @@
                 </div>
             </div>
 
+            <!-- History -->
+            <div class="history" id="history"></div>
+
             <!-- Active Effects Panel -->
             <div class="active-effects-panel">
                 <h3>⚡ Effetti Attivi</h3>
@@ -513,9 +516,6 @@
                 <h3>📊 Classifica</h3>
                 <div id="leaderboard-list"></div>
             </div>
-
-            <!-- History -->
-            <div class="history" id="history"></div>
 
             <!-- Quick Commands (Master only) -->
             <div id="quick-commands" class="master-controls hidden">
@@ -592,6 +592,18 @@
                     <button id="swap-hp-btn" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6);">🔄 Scambia HP</button>
                 </div>
                 
+                <div class="qc-section">
+                    <div class="qc-section-title">Immortalità ⭐</div>
+                    <select id="immortal-players" multiple size="3"></select>
+                    <button id="toggle-immortality-btn" style="background:linear-gradient(135deg,#eab308,#f59e0b);margin-top:6px;">⭐ Attiva/Disattiva</button>
+                </div>
+                
+                <div class="qc-section">
+                    <div class="qc-section-title">Conversione Danni → Cure 💫</div>
+                    <select id="damage-to-heal-players" multiple size="3"></select>
+                    <button id="toggle-damage-to-heal-btn" style="background:linear-gradient(135deg,#ec4899,#f472b6);margin-top:6px;">💫 Attiva/Disattiva</button>
+                </div>
+                
                 </div>
                 </details>
             </div>
@@ -644,6 +656,14 @@
                             <button id="toggle-domino-btn" style="background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #64748b;">🁡 Attiva/Disattiva</button>
                             <div style="font-size:0.8em;color:#94a3b8;margin-top:6px;padding:6px;background:rgba(100,116,139,0.08);border-radius:6px;">💡 1 turno: i danni si propagano al giocatore successivo</div>
                         </div>
+                        <div class="input-group">
+                            <label>Tiro Caricato ⚡</label>
+                            <select id="tiro-caricato-player"></select>
+                            <input type="number" id="tiro-caricato-multiplier" placeholder="Moltiplicatore (2-15)" min="2" max="15" value="2" style="margin:8px 0;">
+                            <button id="set-tiro-caricato-btn" style="background:linear-gradient(135deg,#f59e0b,#eab308);">⚡ Imposta</button>
+                            <button id="remove-tiro-caricato-btn" style="background:#ef4444;">❌ Rimuovi</button>
+                            <div style="font-size:0.8em;color:#fde047;margin-top:6px;padding:6px;background:rgba(245,158,11,0.08);border-radius:6px;">💡 Uso singolo: moltiplica il prossimo danno inflitto (NON le cure)</div>
+                        </div>
                     </div>
                 </details>
 
@@ -651,16 +671,6 @@
                 <details class="control-category">
                     <summary>🛡️ Effetti Difensivi</summary>
                     <div class="category-content">
-                        <div class="input-group">
-                            <label>Immortalità ⭐</label>
-                            <select id="immortal-players" multiple size="4"></select>
-                            <button id="toggle-immortality-btn" style="background:linear-gradient(135deg,#eab308,#f59e0b);">⭐ Attiva/Disattiva</button>
-                        </div>
-                        <div class="input-group">
-                            <label>Conversione Danni → Cure 💫</label>
-                            <select id="damage-to-heal-players" multiple size="4"></select>
-                            <button id="toggle-damage-to-heal-btn" style="background:linear-gradient(135deg,#ec4899,#f472b6);">💫 Attiva/Disattiva</button>
-                        </div>
                         <div class="input-group">
                             <label>Armatura del Sole ☀️</label>
                             <select id="sun-armor-players" multiple size="4"></select>
@@ -742,6 +752,20 @@
                             <button id="toggle-nirvana-btn" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">🧘 Attiva/Disattiva</button>
                             <div style="font-size:0.8em;color:#c4b5fd;margin-top:6px;padding:6px;background:rgba(139,92,246,0.08);border-radius:6px;">💡 1 turno: l'attivatore guadagna HP pari al totale dei dadi altrui</div>
                         </div>
+                        <div class="input-group">
+                            <label>Interferenza 🔀</label>
+                            <select id="interferenza-player1"></select>
+                            <select id="interferenza-player2" style="margin-top:6px;"></select>
+                            <button id="set-interferenza-btn" style="background:linear-gradient(135deg,#a855f7,#d946ef);">🔀 Imposta</button>
+                            <button id="remove-interferenza-btn" style="background:#ef4444;">❌ Rimuovi</button>
+                            <div style="font-size:0.8em;color:#e9d5ff;margin-top:6px;padding:6px;background:rgba(168,85,247,0.08);border-radius:6px;">💡 1 turno: trasferisce i danni ricevuti al partner</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Protettore del Fato 🛡️✨</label>
+                            <select id="protettore-fato-players" multiple size="4"></select>
+                            <button id="toggle-protettore-fato-btn" style="background:linear-gradient(135deg,#facc15,#fbbf24);">🛡️✨ Attiva/Disattiva</button>
+                            <div style="font-size:0.8em;color:#fde047;margin-top:6px;padding:6px;background:rgba(250,204,21,0.08);border-radius:6px;">💡 1 turno: protegge da TUTTI gli effetti dannosi/eliminazione (incluso Kraken, Scacco Matto, Boia, ecc.)</div>
+                        </div>
                     </div>
                 </details>
 
@@ -776,13 +800,6 @@
                                 <input type="number" id="uguaglianza-divisor" placeholder="Divisore (1-15)" min="1" max="15" value="1">
                                 <button id="uguaglianza-btn" style="background:linear-gradient(135deg,#6366f1,#818cf8);">⚖️ Attiva</button>
                             </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Interferenza 🔀</label>
-                            <select id="interferenza-player1"></select>
-                            <select id="interferenza-player2" style="margin-top:6px;"></select>
-                            <button id="set-interferenza-btn" style="background:linear-gradient(135deg,#a855f7,#d946ef);">🔀 Imposta</button>
-                            <button id="remove-interferenza-btn" style="background:#ef4444;">❌ Rimuovi</button>
                         </div>
                         <div class="input-group">
                             <label>Alta Marea 🌊</label>
@@ -855,6 +872,20 @@
                             <button id="set-tocca-a-me-btn" style="background:linear-gradient(135deg,#be185d,#ec4899);">✋ Imposta</button>
                             <button id="remove-tocca-a-me-btn" style="background:#ef4444;">❌ Rimuovi</button>
                             <div style="font-size:0.8em;color:#f9a8d4;margin-top:6px;padding:6px;background:rgba(236,72,153,0.08);border-radius:6px;">💡 Uso singolo: l'attivatore gioca al posto del bersaglio</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Minotauro Corrotto 🐂</label>
+                            <select id="minotauro-corrotto-activator"><option value="">Seleziona Attivatore</option></select>
+                            <button id="toggle-minotauro-corrotto-btn" style="background:linear-gradient(135deg,#7f1d1d,#991b1b);">🐂 Attiva/Disattiva</button>
+                            <div style="font-size:0.8em;color:#fca5a5;margin-top:6px;padding:6px;background:rgba(153,27,27,0.08);border-radius:6px;">💡 1 turno: solo danni dispari sono validi (danni pari = 0)</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Troll Face 😈</label>
+                            <select id="troll-face-activator"><option value="">Seleziona Attivatore</option></select>
+                            <input type="number" id="troll-face-value" placeholder="Valore da annullare (1-6)" min="1" max="6" value="3" style="margin:8px 0;">
+                            <button id="set-troll-face-btn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">😈 Imposta</button>
+                            <button id="remove-troll-face-btn" style="background:#ef4444;">❌ Rimuovi</button>
+                            <div style="font-size:0.8em;color:#c4b5fd;margin-top:6px;padding:6px;background:rgba(124,58,237,0.08);border-radius:6px;">💡 1 turno: il valore scelto diventa 0 per tutti (escluso attivatore)</div>
                         </div>
                     </div>
                 </details>
@@ -1055,7 +1086,12 @@
                 toccaAMeRedirectFrom: null,
                 setteBello: false,
                 setteBelloActivator: null,
-                setteBelloTurnsLeft: 0
+                setteBelloTurnsLeft: 0,
+                minotauroCorreto: false,
+                minotauroCorretoActivator: null,
+                trollFace: false,
+                trollFaceActivator: null,
+                trollFaceValue: null
             }
         };
 
@@ -1162,6 +1198,12 @@
         document.getElementById('toggle-nirvana-btn')?.addEventListener('click', toggleNirvana);
         document.getElementById('set-tocca-a-me-btn')?.addEventListener('click', setToccaAMe);
         document.getElementById('remove-tocca-a-me-btn')?.addEventListener('click', removeToccaAMe);
+        document.getElementById('toggle-protettore-fato-btn')?.addEventListener('click', toggleProtettoreFato);
+        document.getElementById('set-tiro-caricato-btn')?.addEventListener('click', setTiroCaricato);
+        document.getElementById('remove-tiro-caricato-btn')?.addEventListener('click', removeTiroCaricato);
+        document.getElementById('toggle-minotauro-corrotto-btn')?.addEventListener('click', toggleMinotauroCorreto);
+        document.getElementById('set-troll-face-btn')?.addEventListener('click', setTrollFace);
+        document.getElementById('remove-troll-face-btn')?.addEventListener('click', removeTrollFace);
         
         // Close modal clicking outside
         document.getElementById('qr-modal')?.addEventListener('click', function(e) {
@@ -1321,6 +1363,9 @@
                 boiaEsecutore: false,
                 boiaEsecutoreTurns: 0,
                 extraTurns: 0,
+                protettoreFato: false,
+                tiroCaricato: false,
+                tiroCaricatoMultiplier: null,
                 temporaryEffects: {
                     immortal: false,
                     multiplier: false,
@@ -1335,7 +1380,8 @@
                     catenaMaledetta: false,
                     rifletteDanni: false,
                     talismanRa: false,
-                    dadoAvvelenato: false
+                    dadoAvvelenato: false,
+                    protettoreFato: false
                 }
             }];
             
@@ -1379,6 +1425,9 @@
                         boiaEsecutoreTurns: 0,
                         extraTurns: 0,
                         masterNote: '', // Note del master visibili a tutti
+                        protettoreFato: false,
+                        tiroCaricato: false,
+                        tiroCaricatoMultiplier: null,
                         temporaryEffects: {
                             immortal: false,
                             multiplier: false,
@@ -1393,7 +1442,8 @@
                             catenaMaledetta: false,
                             rifletteDanni: false,
                             talismanRa: false,
-                            dadoAvvelenato: false
+                            dadoAvvelenato: false,
+                            protettoreFato: false
                         }
                     });
                 }
@@ -1644,6 +1694,8 @@
                 if (player.reincarnazione) badges += '<span class="effect-badge reincarna">♻️</span>';
                 if (player.boiaEsecutore) badges += '<span class="effect-badge boia">🪓 ' + player.boiaEsecutoreTurns + 't</span>';
                 if (player.extraTurns > 0) badges += '<span class="effect-badge extra-turn">🔄 +' + player.extraTurns + '</span>';
+                if (player.protettoreFato) badges += '<span class="effect-badge protettore">🛡️✨ Protetto</span>';
+                if (player.tiroCaricato) badges += '<span class="effect-badge tiro-caricato">⚡ x' + (player.tiroCaricatoMultiplier || 2) + '</span>';
                 
                 card.innerHTML = `
                     <div class="player-info">
@@ -1990,7 +2042,8 @@
                 { id: 'cactus-amari-players', prop: 'cactusAmari', emoji: '🌵' },
                 { id: 'catena-maledetta-players', prop: 'catenaMaledetta', emoji: '⛓️' },
                 { id: 'rifletti-danni-players', prop: 'rifletteDanni', emoji: '🛡️' },
-                { id: 'dado-avvelenato-player', prop: 'dadoAvvelenato', emoji: '☠️' }
+                { id: 'dado-avvelenato-player', prop: 'dadoAvvelenato', emoji: '☠️' },
+                { id: 'protettore-fato-players', prop: 'protettoreFato', emoji: '🛡️✨' }
             ];
             
             nuoviSelectMultipli.forEach(({ id, prop, emoji }) => {
@@ -2048,7 +2101,8 @@
             // Update select singoli
             const selectSingoli = ['talismano-ra-player', 'interferenza-player1', 
                                    'interferenza-player2', 'alta-marea-player', 'zebratura-player', 
-                                   'boomerang-player', 'armatura-specchio-player', 'sabbie-mobili-player', 'sette-bello-player'];
+                                   'boomerang-player', 'armatura-specchio-player', 'sabbie-mobili-player', 'sette-bello-player',
+                                   'tiro-caricato-player'];
             
             selectSingoli.forEach(selectId => {
                 const select = document.getElementById(selectId);
@@ -2100,7 +2154,9 @@
                 'tre-molio-activator',
                 'nirvana-activator',
                 'tocca-a-me-activator',
-                'tocca-a-me-target'
+                'tocca-a-me-target',
+                'minotauro-corrotto-activator',
+                'troll-face-activator'
             ];
             
             activatorSelects.forEach(selectId => {
@@ -2115,6 +2171,130 @@
                     });
                 }
             });
+        }
+
+        // === HELPER: Try to eliminate player with resurrection check ===
+        function tryEliminatePlayer(player, eliminationReason, playEliminationSound = true) {
+            if (player.isEliminated) return false; // Already eliminated
+            
+            // PROTETTORE DEL FATO - protegge da TUTTE le eliminazioni (anche dirette)
+            if (player.protettoreFato) {
+                gameState.history.push(`🛡️✨ [Protettore del Fato] ${player.name} è protetto dall'eliminazione! ${eliminationReason}`);
+                playSound('heal');
+                if (player.name === gameState.playerName) {
+                    screenFlash('heal');
+                }
+                return false; // Not eliminated - protected
+            }
+            
+            const wasAlive = player.hp > 0;
+            player.hp = 0;
+            
+            // Reset ALL effects before checking resurrection
+            player.isImmortal = false;
+            player.multiplier = 1;
+            player.multiplierAppliedBy = null;
+            player.skipTurn = false;
+            player.customDiceCount = null;
+            player.krakenMark = false;
+            player.checkmateHP = null;
+            player.damageToHeal = false;
+            player.sunArmor = false;
+            player.moonArmor = false;
+            player.mareGuai = false;
+            player.voloFenice = false;
+            player.cactusAmari = false;
+            player.catenaMaledetta = false;
+            player.rifletteDanni = false;
+            player.talismanRa = false;
+            player.talismanRaValues = [];
+            player.dadoAvvelenato = false;
+            player.dadoAvvelenatotValues = [];
+            player.interferenza = false;
+            player.interferenzaPartner = null;
+            player.protettoreFato = false;
+            player.tiroCaricato = false;
+            player.tiroCaricatoMultiplier = null;
+            player.temporaryEffects = {
+                immortal: false, multiplier: false, skipTurn: false, customDice: false,
+                damageToHeal: false, sunArmor: false, moonArmor: false,
+                mareGuai: false, voloFenice: false, cactusAmari: false,
+                catenaMaledetta: false, rifletteDanni: false,
+                talismanRa: false, dadoAvvelenato: false, protettoreFato: false
+            };
+            
+            // === Check RESURRECTION (in priority order) ===
+            let resurrected = false;
+            
+            // 1. CANTO DEL CIGNO
+            if (player.cantoDelCigno) {
+                player.hp = 1;
+                player.isEliminated = false;
+                player.cantoDelCigno = false;
+                gameState.history.push(`🦢 [Canto del Cigno] ${player.name} torna in vita con 1 HP! ${eliminationReason}`);
+                playSound('revive');
+                if (player.name === gameState.playerName) {
+                    screenFlash('revive');
+                }
+                resurrected = true;
+            }
+            // 2. PATTO CON IL DIAVOLO
+            else if (player.pattoDiavolo && !player.pattoDiavoloUsed) {
+                player.hp = 20;
+                player.isEliminated = false;
+                player.customDiceCount = 2; // Only 2 dice forever
+                player.pattoDiavolo = false;
+                player.pattoDiavoloUsed = true;
+                gameState.history.push(`😈 [Patto col Diavolo] ${player.name} torna con 20 HP, ma userà solo 2 dadi per sempre. ${eliminationReason}`);
+                playSound('revive');
+                if (player.name === gameState.playerName) {
+                    screenFlash('revive');
+                }
+                resurrected = true;
+            }
+            // 3. TOMBA DI TUTANKHAMON
+            else if (player.tombaTutankhamon) {
+                player.hp = Math.ceil(gameState.initialHP / 2);
+                player.isEliminated = false;
+                player.skipTurn = true;
+                player.tombaTutankhamon = false;
+                gameState.history.push(`🏺 [Tomba Tutankhamon] ${player.name} torna con ${player.hp} HP, ma salterà il prossimo turno. ${eliminationReason}`);
+                playSound('revive');
+                if (player.name === gameState.playerName) {
+                    screenFlash('revive');
+                }
+                resurrected = true;
+            }
+            // 4. REINCARNAZIONE
+            else if (player.reincarnazione && !player.reincarnazioneUsed) {
+                player.hp = gameState.initialHP;
+                player.isEliminated = false;
+                player.multiplier = 2; // Permanent x2 damage taken
+                player.reincarnazione = false;
+                player.reincarnazioneUsed = true;
+                gameState.history.push(`♻️ [Reincarnazione] ${player.name} torna con ${player.hp} HP, ma subirà danni x2 permanentemente. ${eliminationReason}`);
+                playSound('revive');
+                if (player.name === gameState.playerName) {
+                    screenFlash('revive');
+                }
+                resurrected = true;
+            }
+            
+            // No resurrection - permanently eliminated
+            if (!resurrected) {
+                player.isEliminated = true;
+                gameState.history.push(`💀 ${player.name} è stato eliminato! ${eliminationReason}`);
+                
+                if (playEliminationSound) {
+                    playSound('elimination');
+                }
+                
+                if (player.name === gameState.playerName && !gameState.isMaster) {
+                    setTimeout(() => showEliminatedNotification(), 500);
+                }
+            }
+            
+            return !resurrected; // Return true if actually eliminated (no resurrection)
         }
 
         function calculateDice() {
@@ -2154,6 +2334,14 @@
         }
 
         function processDiceRoll(dice, shooterIndex) {
+            const gfx = gameState.globalEffects;
+            
+            // TROLL FACE: il valore scelto diventa 0 per tutti tranne l'attivatore
+            if (gfx.trollFace && shooterIndex !== gfx.trollFaceActivator) {
+                const targetValue = gfx.trollFaceValue;
+                dice = dice.map(d => d === targetValue ? 0 : d);
+            }
+            
             const sum = dice.reduce((a, b) => a + b, 0);
             const counts = {};
             dice.forEach(d => counts[d] = (counts[d] || 0) + 1);
@@ -2425,8 +2613,7 @@
                 gameState.stats[shooter.name].damageTaken += result.damage;
                 gameState.history.push(`🎲 [Pari Pazzo] ${shooter.name} ha ottenuto somma pari (${result.sum}) → subisce ${result.damage} danni auto-inflitti`);
                 if (shooter.hp === 0 && !shooter.isEliminated) {
-                    shooter.isEliminated = true;
-                    gameState.history.push(`💀 ${shooter.name} è stato eliminato dall'effetto Pari Pazzo!`);
+                    tryEliminatePlayer(shooter, `(Pari Pazzo auto-danno)`);
                 }
             }
             
@@ -2438,7 +2625,9 @@
                     if (!p.isEliminated && idx !== gfx.pioggiaAcidaActivator) {
                         p.hp = Math.max(0, p.hp - maxDice);
                         affectedPlayers.push(p.name);
-                        if (p.hp === 0 && !p.isEliminated) p.isEliminated = true;
+                        if (p.hp === 0 && !p.isEliminated) {
+                            tryEliminatePlayer(p, `(Pioggia Acida)`, false);
+                        }
                     }
                 });
                 gameState.history.push(`☔ [Pioggia Acida] Tutti (escluso attivatore) subiscono ${maxDice} danni: ${affectedPlayers.join(', ')}`);
@@ -2453,8 +2642,7 @@
                         p.hp = Math.max(0, p.hp - totalDmg);
                         affectedPlayers.push(p.name);
                         if (p.hp === 0 && !p.isEliminated) {
-                            p.isEliminated = true;
-                            gameState.history.push(`💀 ${p.name} è stato eliminato dal 3 Molio!`);
+                            tryEliminatePlayer(p, `(3 Molio)`, false);
                         }
                     }
                 });
@@ -2481,8 +2669,7 @@
                 gameState.stats[shooter.name].damageTaken += result.damage;
                 gameState.history.push(`💥 [Cannone Karma] ${shooter.name} subisce ${result.damage} danni auto-inflitti (stesso danno del bersaglio)`);
                 if (shooter.hp === 0 && !shooter.isEliminated) {
-                    shooter.isEliminated = true;
-                    gameState.history.push(`💀 ${shooter.name} è stato eliminato dal Cannone Karma!`);
+                    tryEliminatePlayer(shooter, `(Cannone Karma auto-danno)`);
                 }
             }
             
@@ -2512,8 +2699,7 @@
                         shooter.hp = Math.max(0, shooter.hp - damage);
                         gameState.history.push(`☠️ [Dado Avvelenato] ${shooter.name} subisce -${damage} danni (dadi ${val1},${val2} × ${matchCount} match)`);
                         if (shooter.hp === 0 && !shooter.isEliminated) {
-                            shooter.isEliminated = true;
-                            gameState.history.push(`💀 ${shooter.name} è stato eliminato dal Dado Avvelenato!`);
+                            tryEliminatePlayer(shooter, `(Dado Avvelenato)`);
                         }
                     }
                 }
@@ -2538,6 +2724,23 @@
                 // Apply multiplier to damage (calcolo anticipato per Volo Fenice)
                 const multiplier = finalTarget.multiplier || 1;
                 let actualDamage = Math.ceil(result.damage * multiplier);
+                
+                // TIRO CARICATO - moltiplica il prossimo danno (solo per danni, NON cure)
+                if (shooter.tiroCaricato && actualDamage > 0) {
+                    const tiroMult = shooter.tiroCaricatoMultiplier || 2;
+                    actualDamage = actualDamage * tiroMult;
+                    gameState.history.push(`⚡ [Tiro Caricato] ${shooter.name} moltiplica il danno x${tiroMult}! Danno finale: ${actualDamage}`);
+                    // Disattiva Tiro Caricato dopo l'uso
+                    shooter.tiroCaricato = false;
+                    shooter.tiroCaricatoMultiplier = null;
+                }
+                
+                // MINOTAURO CORROTTO - annulla danni pari (NON le cure)
+                if (gfx.minotauroCorreto && actualDamage > 0 && actualDamage % 2 === 0) {
+                    gameState.history.push(`🐂 [Minotauro Corrotto] Danno pari ${actualDamage} annullato!`);
+                    actualDamage = 0;
+                    // Il turno procede automaticamente poiché il danno è nullo
+                }
                 
                 // BOOMERANG - accumula invece di applicare (PRIORITÀ MASSIMA - sempre prima di tutto)
                 if (gfx.boomerang && result.targetIndex === gfx.boomerangActivator && actualDamage > 0) {
@@ -2568,6 +2771,16 @@
                     });
                     // Non fare altro, il danno è stato convertito
                 } 
+                // PROTETTORE DEL FATO - protegge da TUTTI gli effetti dannosi (incluso eliminazione diretta)
+                else if (finalTarget.protettoreFato && actualDamage > 0) {
+                    gameState.history.push(`🛡️✨ [Protettore del Fato] ${finalTarget.name} è protetto da tutti i danni e effetti dannosi!`);
+                    playSound('heal');
+                    if (finalTarget.name === gameState.playerName) {
+                        screenFlash('heal');
+                        createParticles(window.innerWidth / 2, window.innerHeight / 2, 'heal');
+                    }
+                    // Il danno viene completamente bloccato - non fare altro
+                }
                 // Check if target is immortal
                 else if (finalTarget.isImmortal) {
                     // Immortal player takes no damage
@@ -2597,8 +2810,7 @@
                             // Applica il danno al partner invece che continuare con il target originale
                             newTarget.hp = Math.max(0, newTarget.hp - actualDamage);
                             if (newTarget.hp === 0 && !newTarget.isEliminated) {
-                                newTarget.isEliminated = true;
-                                gameState.history.push(`💀 ${newTarget.name} è stato eliminato!`);
+                                tryEliminatePlayer(newTarget, `(Interferenza da ${originalTargetName})`);
                             }
                             animateHP(finalTarget.interferenzaPartner, -actualDamage);
                             playSound('damage');
@@ -2631,8 +2843,7 @@
                             p.hp = Math.max(0, p.hp - damagePerPlayer);
                             affectedNames.push(p.name);
                             if (p.hp === 0 && !p.isEliminated) {
-                                p.isEliminated = true;
-                                gameState.history.push(`💀 ${p.name} è stato eliminato!`);
+                                tryEliminatePlayer(p, `(Armatura Specchio)`, false);
                             }
                         });
                         gameState.history.push(`🪞 [Armatura Specchio] ${damagePerPlayer} danni distribuiti a tutti: ${affectedNames.join(', ')}`);
@@ -2651,8 +2862,7 @@
                         shooter.hp = Math.max(0, shooter.hp - actualDamage);
                         gameState.history.push(`🛡️ [Rifletti Danni] ${shooter.name} subisce ${actualDamage} danni riflessi da ${finalTarget.name}`);
                         if (shooter.hp === 0 && !shooter.isEliminated) {
-                            shooter.isEliminated = true;
-                            gameState.history.push(`💀 ${shooter.name} è stato eliminato dal riflesso!`);
+                            tryEliminatePlayer(shooter, `(Riflesso da ${finalTarget.name})`);
                         }
                         animateHP(result.shooterIndex, -actualDamage);
                         playSound('damage');
@@ -2696,8 +2906,7 @@
                         gameState.stats[finalTarget.name].damageDealt += reflectedDamage;
                         gameState.history.push(`🌵 [Cactus Amari] ${shooter.name} subisce ${reflectedDamage} danni riflessi (x2) da ${finalTarget.name}`);
                         if (shooter.hp === 0 && !shooter.isEliminated) {
-                            shooter.isEliminated = true;
-                            gameState.history.push(`💀 ${shooter.name} è stato eliminato dalle spine!`);
+                            tryEliminatePlayer(shooter, `(Spine Cactus Amari da ${finalTarget.name})`);
                         }
                         animateHP(result.shooterIndex, -reflectedDamage);
                         // Il target subisce comunque il danno normale
@@ -2716,8 +2925,7 @@
                                 adjacent.hp = Math.max(0, adjacent.hp - actualDamage);
                                 chainedPlayers.push(adjacent.name);
                                 if (adjacent.hp === 0 && !adjacent.isEliminated) {
-                                    adjacent.isEliminated = true;
-                                    gameState.history.push(`💀 ${adjacent.name} è stato eliminato dalla catena!`);
+                                    tryEliminatePlayer(adjacent, `(Catena Maledetta da ${finalTarget.name})`, false);
                                 }
                             }
                         });
@@ -2756,8 +2964,7 @@
                             dominoPlayer.hp = Math.max(0, dominoPlayer.hp - actualDamage);
                             gameState.history.push(`🁡 [Domino] ${dominoPlayer.name} subisce ${actualDamage} danni a catena!`);
                             if (dominoPlayer.hp === 0 && !dominoPlayer.isEliminated) {
-                                dominoPlayer.isEliminated = true;
-                                gameState.history.push(`💀 ${dominoPlayer.name} è stato eliminato dall'effetto Domino!`);
+                                tryEliminatePlayer(dominoPlayer, `(Domino da ${finalTarget.name})`, false);
                             }
                             animateHP(dominoTarget, -actualDamage);
                         }
@@ -2802,32 +3009,20 @@
                         
                         finalTarget.hp = Math.max(0, finalTarget.hp - actualDamage);
                         
-                        // Check Checkmate - auto-eliminate at exact HP value
-                        if (finalTarget.checkmateHP && finalTarget.hp === finalTarget.checkmateHP && !finalTarget.isEliminated) {
+                        // Check Checkmate - force HP to 0 at exact HP value (resurrection can still activate)
+                        // PROTETTORE DEL FATO bypassa questo effetto
+                        if (finalTarget.checkmateHP && finalTarget.hp === finalTarget.checkmateHP && !finalTarget.isEliminated && !finalTarget.protettoreFato) {
                             finalTarget.hp = 0;
-                            finalTarget.isEliminated = true;
-                            gameState.history.push(`♟️ ${finalTarget.name} è stato eliminato dallo Scacco Matto! (${finalTarget.checkmateHP} HP)`);
-                            
-                            // Show elimination notification
-                            if (finalTarget.name === gameState.playerName && !gameState.isMaster) {
-                                setTimeout(() => showEliminatedNotification(), 500);
-                            }
-                            
-                            playSound('elimination');
+                            gameState.history.push(`♟️ ${finalTarget.name} attivato Scacco Matto! (${finalTarget.checkmateHP} HP)`);
                         }
-                        // Check Kraken Mark - auto-eliminate at 10 HP or less
-                        else if (finalTarget.krakenMark && finalTarget.hp <= 10 && finalTarget.hp > 0 && !finalTarget.isEliminated) {
+                        // Check Kraken Mark - force HP to 0 at 10 HP or less (resurrection can still activate)
+                        // PROTETTORE DEL FATO bypassa questo effetto
+                        else if (finalTarget.krakenMark && finalTarget.hp <= 10 && finalTarget.hp > 0 && !finalTarget.isEliminated && !finalTarget.protettoreFato) {
                             finalTarget.hp = 0;
-                            finalTarget.isEliminated = true;
-                            gameState.history.push(`🐙 ${finalTarget.name} è stato eliminato dal Marchio del Kraken! (HP ≤ 10)`);
-                            
-                            // Show elimination notification
-                            if (finalTarget.name === gameState.playerName && !gameState.isMaster) {
-                                setTimeout(() => showEliminatedNotification(), 500);
-                            }
-                            
-                            playSound('elimination');
-                        } else if (finalTarget.hp === 0 && wasAlive) {
+                            gameState.history.push(`🐙 ${finalTarget.name} attivato Marchio del Kraken! (HP ≤ 10)`);
+                        }
+                        
+                        if (finalTarget.hp === 0 && wasAlive) {
                             // === RESET TUTTI GLI EFFETTI QUANDO ELIMINATO ===
                             finalTarget.isImmortal = false;
                             finalTarget.multiplier = 1;
@@ -2850,12 +3045,15 @@
                             target.dadoAvvelenatotValues = [];
                             finalTarget.interferenza = false;
                             finalTarget.interferenzaPartner = null;
+                            finalTarget.protettoreFato = false;
+                            finalTarget.tiroCaricato = false;
+                            finalTarget.tiroCaricatoMultiplier = null;
                             finalTarget.temporaryEffects = {
                                 immortal: false, multiplier: false, skipTurn: false, customDice: false,
                                 damageToHeal: false, sunArmor: false, moonArmor: false,
                                 mareGuai: false, voloFenice: false, cactusAmari: false,
                                 catenaMaledetta: false, rifletteDanni: false,
-                                talismanRa: false, dadoAvvelenato: false
+                                talismanRa: false, dadoAvvelenato: false, protettoreFato: false
                             };
                             
                             // === CARTE RESURREZIONE (in ordine di priorità) ===
@@ -2929,8 +3127,7 @@
                                             p.hp = Math.max(0, p.hp - contagioDamage);
                                             contagioAffected.push(p.name);
                                             if (p.hp === 0 && !p.isEliminated) {
-                                                p.isEliminated = true;
-                                                gameState.history.push(`💀 ${p.name} è stato eliminato dal Contagio!`);
+                                                tryEliminatePlayer(p, `(Contagio da ${finalTarget.name})`, false);
                                             }
                                         }
                                     });
@@ -2964,37 +3161,7 @@
                                 const nextPlayer = gameState.players[nextPlayerIndex];
                                 // Verifica che non sia l'attivatore e che sia vivo
                                 if (nextPlayer && !nextPlayer.isEliminated && nextPlayerIndex !== result.shooterIndex) {
-                                    nextPlayer.hp = 0;
-                                    nextPlayer.isEliminated = true;
-                                    // Reset effetti anche per questo giocatore
-                                    nextPlayer.isImmortal = false;
-                                    nextPlayer.multiplier = 1;
-                                    nextPlayer.multiplierAppliedBy = null;
-                                    nextPlayer.skipTurn = false;
-                                    nextPlayer.customDiceCount = null;
-                                    nextPlayer.krakenMark = false;
-                                    nextPlayer.checkmateHP = null;
-                                    nextPlayer.damageToHeal = false;
-                                    nextPlayer.sunArmor = false;
-                                    nextPlayer.moonArmor = false;
-                                    nextPlayer.mareGuai = false;
-                                    nextPlayer.voloFenice = false;
-                                    nextPlayer.cactusAmari = false;
-                                    nextPlayer.catenaMaledetta = false;
-                                    nextPlayer.rifletteDanni = false;
-                                    nextPlayer.talismanRa = false;
-                                    nextPlayer.talismanRaValues = [];
-                                    nextPlayer.dadoAvvelenato = false;
-                                    nextPlayer.dadoAvvelenatotValues = [];
-                                    nextPlayer.interferenza = false;
-                                    nextPlayer.interferenzaPartner = null;
-                                    nextPlayer.cantoDelCigno = false;
-                                    nextPlayer.pattoDiavolo = false;
-                                    nextPlayer.tombaTutankhamon = false;
-                                    nextPlayer.reincarnazione = false;
-                                    
-                                    gameState.history.push(`🪓 [Boia Esecutore] ${shooter.name} elimina istantaneamente anche ${nextPlayer.name}!`);
-                                    playSound('elimination');
+                                    tryEliminatePlayer(nextPlayer, `(Eliminazione a catena da Boia Esecutore)`);
                                 }
                             }
                         } else {
@@ -3085,16 +3252,7 @@
                 
                 if (activePlayers.length >= 7) {
                     const seventhPlayer = activePlayers[6]; // Indice 6 = settimo giocatore
-                    seventhPlayer.player.hp = 0;
-                    seventhPlayer.player.isEliminated = true;
-                    seventhPlayer.player.isImmortal = false; // Bypassa immortalità
-                    
-                    gameState.history.push(`🎰 [7 BELLO] ${shooter.name} ha fatto 7! ${seventhPlayer.player.name} (settimo giocatore) ELIMINATO direttamente!`);
-                    playSound('elimination');
-                    
-                    if (seventhPlayer.player.name === gameState.playerName && !gameState.isMaster) {
-                        setTimeout(() => showEliminatedNotification(), 500);
-                    }
+                    tryEliminatePlayer(seventhPlayer.player, `(Eliminazione da 7 BELLO)`);
                 } else {
                     gameState.history.push(`🎰 [7 Bello] ${shooter.name} ha fatto 7, ma non ci sono abbastanza giocatori attivi (serve almeno 7)`);
                 }
@@ -3674,11 +3832,9 @@
                     // Applica danno diretto
                     target.hp = Math.max(0, target.hp - amount);
                     
-                    // Controlla eliminazione
+                    // Controlla eliminazione con resurrezione
                     if (target.hp === 0 && !target.isEliminated) {
-                        target.isEliminated = true;
-                        gameState.history.push(`💀 ${target.name} è stato eliminato dal danno manuale!`);
-                        playSound('elimination');
+                        tryEliminatePlayer(target, `(Danno manuale da ${activator.name})`);
                     } else {
                         playSound('hit');
                     }
@@ -4299,6 +4455,10 @@
                 player.interferenzaPartner = null;
                 resetMessage.push('interferenza');
             }
+            if (player.temporaryEffects.protettoreFato && player.protettoreFato) {
+                player.protettoreFato = false;
+                resetMessage.push('protettore del fato');
+            }
             
             // Reset effetti globali se questo giocatore è l'attivatore
             let globalReset = [];
@@ -4359,7 +4519,9 @@
                     gameState.players.forEach((p, idx) => {
                         if (idx !== playerIndex && !p.isEliminated) {
                             p.hp = Math.max(0, p.hp - gfx.boomerangDamage);
-                            if (p.hp === 0) p.isEliminated = true;
+                            if (p.hp === 0 && !p.isEliminated) {
+                                tryEliminatePlayer(p, `(Boomerang)`, false);
+                            }
                         }
                     });
                     gameState.history.push(`🪃 Boomerang: ${gfx.boomerangDamage} danni inflitti a tutti!`);
@@ -4395,6 +4557,17 @@
                 gfx.nirvana = false;
                 gfx.nirvanaActivator = null;
                 globalReset.push('nirvana');
+            }
+            if (gfx.minotauroCorretoActivator === playerIndex && gfx.minotauroCorreto) {
+                gfx.minotauroCorreto = false;
+                gfx.minotauroCorretoActivator = null;
+                globalReset.push('minotauro corrotto');
+            }
+            if (gfx.trollFaceActivator === playerIndex && gfx.trollFace) {
+                gfx.trollFace = false;
+                gfx.trollFaceActivator = null;
+                gfx.trollFaceValue = null;
+                globalReset.push('troll face');
             }
             
             // Decrementa turni 7 Bello
@@ -5211,9 +5384,11 @@
                 cumulativeDamage = baseDamage * hitCount;
                 player.hp = Math.max(0, player.hp - cumulativeDamage);
                 
-                if (player.hp === 0) {
-                    player.isEliminated = true;
-                    gameState.history.push(`🔥 Geyser di Fuoco: ${player.name} eliminato! (${cumulativeDamage} danni)`);
+                if (player.hp === 0 && !player.isEliminated) {
+                    tryEliminatePlayer(player, `(Geyser di Fuoco da ${activator.name})`, false);
+                    if (player.isEliminated) {
+                        gameState.history.push(`🔥 Geyser di Fuoco: ${player.name} eliminato! (${cumulativeDamage} danni)`);
+                    }
                 } else {
                     gameState.history.push(`🔥 Geyser di Fuoco: ${player.name} subisce ${cumulativeDamage} danni (HP: ${player.hp})`);
                 }
@@ -5892,6 +6067,126 @@
             });
         }
 
+        // ===== PROTETTORE DEL FATO =====
+        function toggleProtettoreFato() {
+            if (!gameState.isMaster) return;
+            const select = document.getElementById('protettore-fato-players');
+            const selectedIndices = Array.from(select.selectedOptions).map(option => parseInt(option.value));
+            if (selectedIndices.length === 0) { alert('Seleziona almeno un giocatore!'); return; }
+            
+            selectedIndices.forEach(index => {
+                const player = gameState.players[index];
+                player.protettoreFato = !player.protettoreFato;
+                if (player.temporaryEffects) player.temporaryEffects.protettoreFato = player.protettoreFato;
+            });
+            
+            const status = gameState.players[selectedIndices[0]].protettoreFato ? 'attivato' : 'disattivato';
+            const names = selectedIndices.map(i => gameState.players[i].name).join(', ');
+            gameState.history.push(`🛡️✨ Protettore del Fato ${status} per: ${names}`);
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                players: gameState.players,
+                history: gameState.history
+            });
+        }
+
+        // ===== TIRO CARICATO =====
+        function setTiroCaricato() {
+            if (!gameState.isMaster) return;
+            const playerIndex = parseInt(document.getElementById('tiro-caricato-player').value);
+            const multiplier = parseInt(document.getElementById('tiro-caricato-multiplier').value);
+            if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            if (isNaN(multiplier) || multiplier < 2 || multiplier > 15) { alert('Moltiplicatore deve essere tra 2 e 15!'); return; }
+            
+            const player = gameState.players[playerIndex];
+            player.tiroCaricato = true;
+            player.tiroCaricatoMultiplier = multiplier;
+            
+            gameState.history.push(`⚡ Tiro Caricato impostato per ${player.name} con moltiplicatore x${multiplier}!`);
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                players: gameState.players,
+                history: gameState.history
+            });
+        }
+
+        function removeTiroCaricato() {
+            if (!gameState.isMaster) return;
+            const playerIndex = parseInt(document.getElementById('tiro-caricato-player').value);
+            if (isNaN(playerIndex)) { alert('Seleziona un giocatore!'); return; }
+            
+            const player = gameState.players[playerIndex];
+            player.tiroCaricato = false;
+            player.tiroCaricatoMultiplier = null;
+            
+            gameState.history.push(`⚡ Tiro Caricato rimosso da ${player.name}.`);
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                players: gameState.players,
+                history: gameState.history
+            });
+        }
+
+        // ===== MINOTAURO CORROTTO =====
+        function toggleMinotauroCorreto() {
+            if (!gameState.isMaster) return;
+            const activatorIndex = parseInt(document.getElementById('minotauro-corrotto-activator').value);
+            if (isNaN(activatorIndex)) { alert('Seleziona un attivatore!'); return; }
+            
+            gameState.globalEffects.minotauroCorreto = !gameState.globalEffects.minotauroCorreto;
+            if (gameState.globalEffects.minotauroCorreto) {
+                gameState.globalEffects.minotauroCorretoActivator = activatorIndex;
+                gameState.history.push(`🐂 Minotauro Corrotto attivato da ${gameState.players[activatorIndex].name}! Solo danni dispari sono validi.`);
+            } else {
+                gameState.globalEffects.minotauroCorretoActivator = null;
+                gameState.history.push('🐂 Minotauro Corrotto disattivato.');
+            }
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                globalEffects: gameState.globalEffects,
+                history: gameState.history
+            });
+        }
+
+        // ===== TROLL FACE =====
+        function setTrollFace() {
+            if (!gameState.isMaster) return;
+            const activatorIndex = parseInt(document.getElementById('troll-face-activator').value);
+            const value = parseInt(document.getElementById('troll-face-value').value);
+            if (isNaN(activatorIndex)) { alert('Seleziona un attivatore!'); return; }
+            if (isNaN(value) || value < 1 || value > 6) { alert('Valore deve essere tra 1 e 6!'); return; }
+            
+            gameState.globalEffects.trollFace = true;
+            gameState.globalEffects.trollFaceActivator = activatorIndex;
+            gameState.globalEffects.trollFaceValue = value;
+            
+            gameState.history.push(`😈 Troll Face attivato da ${gameState.players[activatorIndex].name}! Il valore ${value} diventa 0 per tutti gli altri.`);
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                globalEffects: gameState.globalEffects,
+                history: gameState.history
+            });
+        }
+
+        function removeTrollFace() {
+            if (!gameState.isMaster) return;
+            gameState.globalEffects.trollFace = false;
+            gameState.globalEffects.trollFaceActivator = null;
+            gameState.globalEffects.trollFaceValue = null;
+            gameState.history.push('😈 Troll Face disattivato.');
+            forceUIUpdate();
+            
+            database.ref('games/' + gameState.gameCode).update({
+                globalEffects: gameState.globalEffects,
+                history: gameState.history
+            });
+        }
+
         // ===== NEW: Render Active Effects Panel =====
         function renderActiveEffects() {
             const container = document.getElementById('active-effects-list');
@@ -5920,6 +6215,8 @@
             if (gfx.treMolio) globalEffects.push({icon: '🎯', name: '3 Molio', activator: gameState.players[gfx.treMolioActivator]?.name});
             if (gfx.nirvana) globalEffects.push({icon: '🧘', name: 'Nirvana', activator: gameState.players[gfx.nirvanaActivator]?.name});
             if (gfx.toccaAMe) globalEffects.push({icon: '✋', name: 'Tocca a Me', activator: gameState.players[gfx.toccaAMeActivator]?.name + ' → ' + (gameState.players[gfx.toccaAMeTarget]?.name || '?')});
+            if (gfx.minotauroCorreto) globalEffects.push({icon: '🐂', name: 'Minotauro Corrotto', activator: gameState.players[gfx.minotauroCorretoActivator]?.name});
+            if (gfx.trollFace) globalEffects.push({icon: '😈', name: 'Troll Face (' + gfx.trollFaceValue + '→0)', activator: gameState.players[gfx.trollFaceActivator]?.name});
             
             if (globalEffects.length > 0) {
                 html += '<div class="effects-section"><div class="effects-section-title">🌍 Effetti Globali</div>';
@@ -5959,6 +6256,8 @@
                 if (player.reincarnazione) effects.push('♻️ Reincarna');
                 if (player.boiaEsecutore) effects.push('🪓 Boia ' + player.boiaEsecutoreTurns + 't');
                 if (player.extraTurns > 0) effects.push('🔄 +' + player.extraTurns + ' turni');
+                if (player.protettoreFato) effects.push('🛡️✨ Protetto');
+                if (player.tiroCaricato) effects.push('⚡ Tiro x' + (player.tiroCaricatoMultiplier || 2));
                 
                 if (effects.length > 0) {
                     playerEffects.push({name: player.name, effects: effects, idx: idx});
